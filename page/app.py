@@ -250,18 +250,12 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     dup_names = df[df['name'].duplicated()]['name'].unique()
     dup_emails = df[df['email'].duplicated()]['email'].unique()
     
-    if len(dup_names) > 0 or len(dup_emails) > 0:
-        error_msg = []
-        if len(dup_names) > 0: error_msg.append(f"❗중복된 이름: {', '.join(dup_names)}")
-        if len(dup_emails) > 0: error_msg.append(f"❗중복된 이메일: {', '.join(dup_emails)}")
-        return dbc.Alert("\n".join(error_msg), color="warning"), {"display": "none"}
+    # if len(dup_names) > 0 or len(dup_emails) > 0:
+    #     error_msg = []
+    #     if len(dup_names) > 0: error_msg.append(f"❗중복된 이름: {', '.join(dup_names)}")
+    #     if len(dup_emails) > 0: error_msg.append(f"❗중복된 이메일: {', '.join(dup_emails)}")
+    #     return dbc.Alert("\n".join(error_msg), color="warning"), {"display": "none"}
 
-    if len(dup_names) > 0 or len(dup_emails) > 0:
-        error_msg = []
-        if len(dup_names) > 0: error_msg.append(f"❗중복된 이름: {', '.join(dup_names)}")
-        if len(dup_emails) > 0: error_msg.append(f"❗중복된 이메일: {', '.join(dup_emails)}")
-        return dbc.Alert("\n".join(error_msg), color="warning"), {"display": "none"}
-    
     if len(df) > 10 or len(df) < 5:
         return dbc.Alert("인원 수가 5~10명이어야 합니다!", color="warning"), {"display": "none"}
 
@@ -290,6 +284,9 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     
     for key, value in stored_results.items():
         try :
+            print(value)
+            print(value['email'])
+            
             send_role_msg(es,
                 value['email'],
                 f"[result_timestamp] {value['name']}님 아발론 역할 분배 결과 🧙‍♂️",
@@ -298,12 +295,12 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
                 value['desc']
             )
         except Exception as e:
-            return dbc.Alert(f'''
+            return [dbc.Alert(f'''
                              {value['name']} : {value['email']} 이메일 발송 실패
                              Error sending email: {e}
                              ''', 
-                             color="danger"
-                    )
+                             color="danger"),
+                    {"display": "none"}]
 
 
     return dbc.Alert(f'''
