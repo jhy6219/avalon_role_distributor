@@ -23,7 +23,7 @@ def distributor(player_ids, is_percival, is_morgana):
         bad_player_no = 4
 
     good_player_no = player_no - bad_player_no
-    shuffled = player_ids[:]
+    shuffled = list(player_ids) if hasattr(player_ids, 'tolist') else player_ids[:]
     random.shuffle(shuffled)
     slices = {
         "good": (0, good_player_no),
@@ -34,12 +34,12 @@ def distributor(player_ids, is_percival, is_morgana):
     }
 
     # ✅ 이 시점에 set으로 반환
-    result = {role: set(shuffled[start:end]) for role, (start, end) in slices.items()}
+    result = {role: shuffled[start:end] for role, (start, end) in slices.items()}
     return result
 
 messages = {
     "good": {
-        "bold": "🕊️ 당신은 선인입니다. (아서왕의 충성스러운 신하)",
+        "bold": "🕊️ 당신은 선인입니다.",
         "desc": "정의와 진실을 위해 함께 힘을 모아 승리를 향해 나아가세요!"
     },
     "merlin": {
@@ -57,12 +57,12 @@ messages = {
                 "멀린은 {merlin} 입니다."
     },
     "bad": {
-        "bold": "🗡️ 당신은 악인입니다. (모드레드의 흉악한 수하)",
+        "bold": "🗡️ 당신은 악인입니다.",
         "desc": "선인들을 속이고 혼란을 일으켜 어둠의 승리를 쟁취하세요! \n"
                 "함께하는 악인은 {bad_players} 입니다."
     },
     "morgana": {
-        "bold": "🦹‍♀️ 당신은 악인 모르가나입니다.",
+        "bold": "🦹‍♂️ 당신은 악인 모르가나입니다.",
         "desc": "멀린을 위장하고 악의 동료들과 교묘하게 작전을 펼치세요! \n"
                 "함께하는 악인은 {bad_players} 입니다."
     }

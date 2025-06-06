@@ -250,11 +250,11 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     dup_names = df[df['name'].duplicated()]['name'].unique()
     dup_emails = df[df['email'].duplicated()]['email'].unique()
     
-    # if len(dup_names) > 0 or len(dup_emails) > 0:
-    #     error_msg = []
-    #     if len(dup_names) > 0: error_msg.append(f"❗중복된 이름: {', '.join(dup_names)}")
-    #     if len(dup_emails) > 0: error_msg.append(f"❗중복된 이메일: {', '.join(dup_emails)}")
-    #     return dbc.Alert("\n".join(error_msg), color="warning"), {"display": "none"}
+    if len(dup_names) > 0 or len(dup_emails) > 0:
+        error_msg = []
+        if len(dup_names) > 0: error_msg.append(f"❗중복된 이름: {', '.join(dup_names)}")
+        if len(dup_emails) > 0: error_msg.append(f"❗중복된 이메일: {', '.join(dup_emails)}")
+        return dbc.Alert("\n".join(error_msg), color="warning"), {"display": "none"}
 
     if len(df) > 10 or len(df) < 5:
         return dbc.Alert("인원 수가 5~10명이어야 합니다!", color="warning"), {"display": "none"}
@@ -270,33 +270,31 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
         distributor_result,
         stored_df
     )
-    # # 결과 생성
-    # selected_roles = selected_roles if selected_roles else []
-    # results = []
-    # for _, row in df.iterrows():
-    #     role = (" (퍼시벌)" if "percival" in selected_roles and random.random() < 0.3 else
-    #            " (모르가나)" if "morgana" in selected_roles and random.random() < 0.3 else "")
-    #     result = random.choice(["합격 🎉", "불합격 😢", "보류 🤔", "통과 ✅", "실패 ❌"]) + role
-    #     results.append((row['name'], row['email'], result))
     
-    # stored_results = results
     result_timestamp = datetime.now().strftime("%m.%d %H:%M")
     
     for key, value in stored_results.items():
+
+        email = value['email']
+        name = value['name']
+        bold = value['bold']
+        desc = value['desc']
+        image = value['img']
+
         try :
-            print(value)
-            print(value['email'])
-            
+            # print(key)
+            # print(value)
+            # print(value['email'])
             send_role_msg(es,
-                value['email'],
-                f"[result_timestamp] {value['name']}님 아발론 역할 분배 결과 🧙‍♂️",
-                value['image'],
-                value['bold'],
-                value['desc']
+                email,
+                f"[{result_timestamp}] {name}님 아발론 역할 분배 결과 🧙‍♂️",
+                image,
+                bold,
+                desc
             )
         except Exception as e:
             return [dbc.Alert(f'''
-                             {value['name']} : {value['email']} 이메일 발송 실패
+                             {name} : {email} 이메일 발송 실패
                              Error sending email: {e}
                              ''', 
                              color="danger"),
@@ -305,9 +303,9 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
 
     return dbc.Alert(f'''
                      📧 이메일이 발송되었습니다! ({result_timestamp})
-                     - 👼 선인 : {sum(1 for v in stored_results.values() if v['role'].isin(['good', 'merlin','percival']))}명 (멀린 : {sum(1 for v in stored_results.values() if v['role'] == 'merlin')}명, 일반 선인 {sum(1 for v in stored_results.values() if v['role'] == 'good')}명, 퍼시발 {sum(1 for v in stored_results.values() if v['role'] == 'percival')}명)
-                     - 😈 악인 : {sum(1 for v in stored_results.values() if v['role'].isin(['bad', 'morgana']))}명 (모르가나 : {sum(1 for v in stored_results.values() if v['role'] == 'morgana')}명, 일반 악인 {sum(1 for v in stored_results.values() if v['role'] == 'bad')}명)
-                     ''', color="success"), {"display": "block"}
+                     - 👼 선인 : {sum(1 for v in stored_results.values() if v['role'] in ['good', 'merlin','percival'])}명 (멀린 : {sum(1 for v in stored_results.values() if v['role'] == 'merlin')}명, 일반 선인 {sum(1 for v in stored_results.values() if v['role'] == 'good')}명, 퍼시발 {sum(1 for v in stored_results.values() if v['role'] == 'percival')}명)
+                     - 😈 악인 : {sum(1 for v in stored_results.values() if v['role'] in ['bad', 'morgana'])}명 (모르가나 : {sum(1 for v in stored_results.values() if v['role'] == 'morgana')}명, 일반 악인 {sum(1 for v in stored_results.values() if v['role'] == 'bad')}명)
+                     ''', color="success", style={'white-space': 'pre-line'}), {"display": "none"}
 
 # 콜백: 모달 표시/숨김
 @app.callback(
@@ -334,13 +332,6 @@ def show_results(n_clicks):
     if stored_results is None:
         return dbc.Alert("아직 이메일을 보내지 않았습니다!", color="warning")
     
-    # return [\
-    #     dbc.Alert(f"{result_timestamp} 기준 결과:", color="info", className="mb-3"),
-    #     *[\
-    #        dbc.Alert(f"{name} ({email}): {result}", color="info", className="mb-2") 
-    #       for name, email, result in stored_results
-    # ]
-
     return [
         dbc.Alert(
             [
