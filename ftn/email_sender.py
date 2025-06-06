@@ -124,6 +124,7 @@ class EmailSender:
                 
         except Exception as e:
             print(f"Error sending email: {e}")
+            raise e
 
 
 if __name__ == "__main__":

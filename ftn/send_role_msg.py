@@ -1,5 +1,12 @@
-from email_sender import EmailSender
+import sys
+import os
 
+current_file_path = os.path.abspath(__file__)
+parent_dir = os.path.dirname(current_file_path)
+sys.path.append(parent_dir)
+
+from email_sender import EmailSender
+es = EmailSender('./config/sender.config')
 
 def send_role_msg(
     es:EmailSender,
@@ -18,8 +25,7 @@ def send_role_msg(
 
 
 if __name__ == "__main__":
-    es = EmailSender('./config/sender.config')
-
+    
     send_role_msg(es,
         'cv5006@naver.com',
         'role msg test #1',

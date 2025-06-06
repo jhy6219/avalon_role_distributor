@@ -125,7 +125,7 @@ def generate_player_info(roles, user_info_df):
             bad_picked = bad_image_no.pop()
             img = f'./media/bad_guy_{bad_picked}.png'
 
-        elif player in roles["good"]:
+        elif player in good:
             role = "good"
             bold = messages[role]["bold"]
             desc = messages[role]["desc"]

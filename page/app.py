@@ -11,9 +11,13 @@ current_file_path = os.path.abspath(__file__)
 parent_dir = os.path.dirname(current_file_path)
 grandparent_dir = os.path.dirname(parent_dir)
 sys.path.append(grandparent_dir)
+
 from ftn.generate_msg import distributor, generate_player_info
+from ftn.send_role_msg import send_role_msg
+from ftn.email_sender import EmailSender
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+es = EmailSender('./config/sender.config')
 
 # 결과를 저장할 전역 변수
 stored_results = None
@@ -282,8 +286,26 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     #     results.append((row['name'], row['email'], result))
     
     # stored_results = results
-    result_timestamp = datetime.now().strftime("%m.%d %H:%M:%S")
+    result_timestamp = datetime.now().strftime("%m.%d %H:%M")
     
+    for key, value in stored_results.items():
+        try :
+            send_role_msg(es,
+                value['email'],
+                f"[result_timestamp] {value['name']}님 아발론 역할 분배 결과 🧙‍♂️",
+                value['image'],
+                value['bold'],
+                value['desc']
+            )
+        except Exception as e:
+            return dbc.Alert(f'''
+                             {value['name']} : {value['email']} 이메일 발송 실패
+                             Error sending email: {e}
+                             ''', 
+                             color="danger"
+                    )
+
+
     return dbc.Alert(f'''
                      📧 이메일이 발송되었습니다! ({result_timestamp})
                      - 👼 선인 : {sum(1 for v in stored_results.values() if v['role'].isin(['good', 'merlin','percival']))}명 (멀린 : {sum(1 for v in stored_results.values() if v['role'] == 'merlin')}명, 일반 선인 {sum(1 for v in stored_results.values() if v['role'] == 'good')}명, 퍼시발 {sum(1 for v in stored_results.values() if v['role'] == 'percival')}명)
