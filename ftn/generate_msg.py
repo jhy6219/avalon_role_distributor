@@ -63,17 +63,16 @@ messages = {
     '''
 }
 
-def generate_player_mail(roles, user_info_df):
+def generate_player_info(roles, user_info_df):
     user_info = user_info_df.set_index("player_ids").to_dict(orient="index")
     
-    # Get name mapping for each player ID
     id_to_name = user_info_df.set_index('player_ids')['name'].to_dict()
     
     merlin = set(roles.get("merlin", []))
     persival = set(roles.get("persival", []))
     morigana = set(roles.get("morigana", []))
     bad = set(roles.get("bad", []))
-    print(bad)
+
     for player in user_info.keys():
         if player in merlin:
             bad_names = ", ".join(id_to_name[p] for p in sorted(bad))
