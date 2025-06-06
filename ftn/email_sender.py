@@ -11,15 +11,25 @@ from email.mime.multipart import MIMEMultipart
 from dominate import document
 from dominate.tags import *
 
-# Gmail SMTP server
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-
 
 class EmailSender:
-    def __init__(self, sender_addr:str, receivers_file:str|None=None):
+    def __init__(self, sender_config:str, receivers_file:str|None=None):
         self.msg = MIMEMultipart('related')
-        self.msg["From"] = sender_addr
+        
+        try:
+            with open(sender_config, 'r') as sc:
+                self.smtp_server = sc.readline().strip()
+                self.smtp_port = sc.readline().strip()
+                self.sender_addr = sc.readline().strip()
+                self.sender_pw = sc.readline().strip()
+        except Exception as e:
+            print(f'Failed to load sender.config: {e}')
+            exit()
+        
+        print(f'SMTP Server: {self.smtp_server}:{self.smtp_port}')
+        print(f'Sender: {self.sender_addr}')
+
+        self.msg["From"] = self.sender_addr
         
         self.doc = document(title='html_doc')
         
@@ -92,9 +102,15 @@ class EmailSender:
             p(txt)
 
 
-    def send(self, pw:str, subject:str, receiver_addr:str):
+    def clear_msg(self):
+        self.msg = MIMEMultipart('related')
+        self.msg["From"] = self.sender_addr
+        self.doc = document(title='html_doc')
+
+
+    def send(self, subject:str, receiver_addr:str):
         try:
-            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as srv:
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as srv:
                 sender_addr = self.msg["From"]
                 self.msg["To"] = receiver_addr
                 self.msg["Subject"] = subject
@@ -102,7 +118,7 @@ class EmailSender:
 
                 context = ssl.create_default_context()
                 srv.starttls(context=context)
-                srv.login(sender_addr, password=pw)
+                srv.login(sender_addr, password=self.sender_pw)
                 srv.send_message(self.msg)
                 print("Email sent successfully!")
                 
@@ -111,21 +127,23 @@ class EmailSender:
 
 
 if __name__ == "__main__":
-    addr = input("insert email: ")
-    pw = input("insert password: ")
-
     es = EmailSender(
-        sender_addr=addr,
+        sender_config='config/sender.config',
         receivers_file='./config/receivers.csv'
     )
-    es.add_receiver('player3', 'cv5006@naver.com')
 
-    es.add_img('./media/test_img.png')
-    for i in range(1, 5):
-        es.add_heading(f'h{i} text', i)
-        es.add_text(f'text {i}')
+    es.add_receiver('player3', 'jhy6219@naver.com')
 
+    import os
     import time
+    import random
+    img_list = os.listdir('./media')
     for name, addr in es.receivers.items():
-        es.send(pw, f"test for {name}", addr)
-        time.sleep(3)
+        print(f'sending to {name}: {addr}')
+        es.add_img(f'./media/{random.choice(img_list)}')
+        for i in range(1, 5):
+            es.add_heading(f'h{i} text', i)
+            es.add_text(f'text {i}')
+        es.send(f"test for {name}", addr)
+        es.clear_msg()
+        time.sleep(1)
