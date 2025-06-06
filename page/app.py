@@ -228,7 +228,7 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     
     selected_roles = selected_roles if selected_roles else []
     is_percival=("percival" in selected_roles)
-    is_morigana=("morgana" in selected_roles)
+    is_morgana=("morgana" in selected_roles)
 
     # 기본 유효성 검사
     valid_data = [(i+1, n.strip(), e.strip() + (d or default_domain))
@@ -270,7 +270,7 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     distributor_result = distributor(
             stored_df.player_ids, 
             is_percival= is_percival,
-            is_morigana= is_morigana
+            is_morgana= is_morgana
         )
     stored_results = generate_player_info(
         distributor_result,
