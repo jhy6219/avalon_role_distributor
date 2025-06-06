@@ -1,9 +1,16 @@
 import random
+import os 
+import sys
 
-def distributor(player_ids, is_persival, is_morigana):
+current_file_path = os.path.abspath(__file__)
+parent_dir = os.path.dirname(current_file_path)
+grandparent_dir = os.path.dirname(parent_dir)
+sys.path.append(grandparent_dir)
+
+def distributor(player_ids, is_percival, is_morgana):
     player_no = len(player_ids)
-    persival_player_no = int(is_persival)
-    morigana_player_no = int(is_morigana)
+    percival_player_no = int(is_percival)
+    morgana_player_no = int(is_morgana)
 
     if player_no < 5 or player_no > 10:
         raise ValueError("player_no must be between 5 and 10")
@@ -21,9 +28,9 @@ def distributor(player_ids, is_persival, is_morigana):
     slices = {
         "good": (0, good_player_no),
         "merlin": (0, 1),
-        "persival": (1, 1 + persival_player_no),
+        "percival": (1, 1 + percival_player_no),
         "bad": (good_player_no, len(shuffled)+1),
-        "morigana": (good_player_no, good_player_no + morigana_player_no),
+        "morgana": (good_player_no, good_player_no + morgana_player_no),
     }
 
     # ✅ 이 시점에 set으로 반환
@@ -31,36 +38,34 @@ def distributor(player_ids, is_persival, is_morigana):
     return result
 
 messages = {
-    "good": '''
-    🕊️ 당신은 선인입니다. (아서왕의 충성스러운 신하)
-    정의와 진실을 위해 함께 힘을 모아 승리를 향해 나아가세요!
-    ''',
-    "merlin": '''
-    🧙‍♂️ 당신은 멀린입니다. 
-    악인을 찾아내고 선인들을 지켜야 합니다! 
-    악인은 {bad_players} 입니다.
-    ''',
-    "persival-with-morigana": '''
-    🛡️ 당신은 퍼시발입니다. 
-    멀린을 보호하고, 그의 정체를 추리해 선인들에게 희망을 주세요! 
-    멀린은 {merlin_candidates} 중 한명이고,
-    나머지 한명은 악인 모르가나입니다.
-    ''',
-    "persival-no-morigana": '''
-    🛡️ 당신은 퍼시발입니다. 
-    멀린을 보호하고 선인들에게 희망을 주세요! 
-    멀린은 {merlin} 입니다.
-    ''',
-    "bad": '''
-    🗡️ 당신은 악인입니다. (모드레드의 흉악한 수하)
-    선인들을 속이고 혼란을 일으켜 어둠의 승리를 쟁취하세요! 
-    함께하는 악인은 {bad_players} 입니다.
-    ''',
-    "morigana": '''
-    🦹‍♀️ 당신은 모르가나입니다. 
-    멀린을 위장하고 악의 동료들과 교묘하게 작전을 펼치세요! 
-    함께하는 악인은 {bad_players} 입니다.
-    '''
+    "good": {
+        "bold": "🕊️ 당신은 선인입니다. (아서왕의 충성스러운 신하)",
+        "desc": "정의와 진실을 위해 함께 힘을 모아 승리를 향해 나아가세요!"
+    },
+    "merlin": {
+        "bold": "🧙‍♂️ 당신은 멀린입니다.",
+        "desc": "악인을 찾아내고 선인들을 지켜야 합니다! \n악인은 {bad_players} 입니다."
+    },
+    "percival-with-morgana": {
+        "bold": "🛡️ 당신은 선인 퍼시발입니다.",
+        "desc": "멀린을 보호하고, 그의 정체를 추리해 선인들에게 희망을 주세요! \n"
+                "멀린은 {merlin_candidates} 중 한명이고,\n나머지 한명은 악인 모르가나입니다."
+    },
+    "percival-no-morgana": {
+        "bold": "🛡️ 당신은 선인 퍼시발입니다.",
+        "desc": "멀린을 보호하고 선인들에게 희망을 주세요! \n"
+                "멀린은 {merlin} 입니다."
+    },
+    "bad": {
+        "bold": "🗡️ 당신은 악인입니다. (모드레드의 흉악한 수하)",
+        "desc": "선인들을 속이고 혼란을 일으켜 어둠의 승리를 쟁취하세요! \n"
+                "함께하는 악인은 {bad_players} 입니다."
+    },
+    "morgana": {
+        "bold": "🦹‍♀️ 당신은 악인 모르가나입니다.",
+        "desc": "멀린을 위장하고 악의 동료들과 교묘하게 작전을 펼치세요! \n"
+                "함께하는 악인은 {bad_players} 입니다."
+    }
 }
 
 def generate_player_info(roles, user_info_df):
@@ -68,34 +73,68 @@ def generate_player_info(roles, user_info_df):
     
     id_to_name = user_info_df.set_index('player_ids')['name'].to_dict()
     
+    # 역할 확인 
     merlin = set(roles.get("merlin", []))
-    persival = set(roles.get("persival", []))
-    morigana = set(roles.get("morigana", []))
+    percival = set(roles.get("percival", []))
+    morgana = set(roles.get("morgana", []))
     bad = set(roles.get("bad", []))
+    good = set(roles.get("good", []))
+    
+    # 이미지 번호 랜덤 부여 위함
+    bad_image_no = list(range(1,4))
+    good_image_no = list(range(1,6))
+    random.shuffle(bad_image_no)
+    random.shuffle(good_image_no)
 
     for player in user_info.keys():
+
         if player in merlin:
+            role = "merlin"
             bad_names = ", ".join(id_to_name[p] for p in sorted(bad))
-            msg = messages["merlin"].format(bad_players=bad_names)
-        elif player in persival:
-            if morigana:
-                candidates = sorted(merlin | morigana)
+            bold = messages[role]["bold"]
+            desc = messages[role]["desc"].format(bad_players=bad_names)
+            img = './media/merlin.png'
+
+        elif player in percival:
+            role = "percival"
+            if morgana:
+                candidates = sorted(merlin | morgana)
                 candidate_names = ", ".join(id_to_name[p] for p in candidates)
-                msg = messages["persival-with-morigana"].format(merlin_candidates=candidate_names)
+                desc = messages["percival-with-morgana"]["desc"].format(merlin_candidates=candidate_names)
+                bold = messages["percival-with-morgana"]["bold"]
             else:
                 merlin_player = next(iter(merlin))
-                msg = messages["persival-no-morigana"].format(merlin=id_to_name[merlin_player])
-        elif player in morigana:
-            others = sorted(bad - {player})
-            other_names = ", ".join(id_to_name[p] for p in others)
-            msg = messages["morigana"].format(bad_players=other_names)
-        elif player in bad:
-            others = sorted(bad - {player})
-            other_names = ", ".join(id_to_name[p] for p in others)
-            msg = messages["bad"].format(bad_players=other_names)
-        elif player in roles["good"]:
-            msg = messages["good"]
+                desc = messages["percival-no-morgana"]["desc"].format(merlin=id_to_name[merlin_player])
+                bold = messages["percival-no-morgana"]["bold"]
+            img = './media/percival.png'
 
-        user_info[player]["msg"] = msg
+        elif player in morgana:
+            role = "morgana"
+            others = sorted(bad - {player})
+            other_names = ", ".join(id_to_name[p] for p in others)
+            bold = messages[role]["bold"]
+            desc = messages[role]["desc"].format(bad_players=other_names)
+            img = './media/morgana.png'
+
+        elif player in bad:
+            role = "bad"
+            others = sorted(bad - {player})
+            other_names = ", ".join(id_to_name[p] for p in others)
+            bold = messages[role]["bold"]
+            desc = messages[role]["desc"].format(bad_players=other_names)
+            bad_picked = bad_image_no.pop()
+            img = f'./media/bad_guy_{bad_picked}.png'
+
+        elif player in roles["good"]:
+            role = "good"
+            bold = messages[role]["bold"]
+            desc = messages[role]["desc"]
+            good_picked = good_image_no.pop()
+            img = f'./media/good_guy_{good_picked}.png'
+
+        user_info[player]["role"] = role
+        user_info[player]["bold"] = bold
+        user_info[player]["desc"] = desc
+        user_info[player]["img"] = img
 
     return user_info

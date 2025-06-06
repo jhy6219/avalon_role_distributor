@@ -11,7 +11,7 @@ current_file_path = os.path.abspath(__file__)
 parent_dir = os.path.dirname(current_file_path)
 grandparent_dir = os.path.dirname(parent_dir)
 sys.path.append(grandparent_dir)
-from ftn.generate_msg import distributor
+from ftn.generate_msg import distributor, generate_player_info
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -223,7 +223,7 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     global stored_results, result_timestamp, stored_df
     
     selected_roles = selected_roles if selected_roles else []
-    is_persival=("percival" in selected_roles)
+    is_percival=("percival" in selected_roles)
     is_morigana=("morgana" in selected_roles)
 
     # 기본 유효성 검사
@@ -261,29 +261,34 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
     if len(df) > 10 or len(df) < 5:
         return dbc.Alert("인원 수가 5~10명이어야 합니다!", color="warning"), {"display": "none"}
 
-    # print(df)
-    # print(selected_roles)
+
     stored_df = df  # DataFrame 저장
     distributor_result = distributor(
             stored_df.player_ids, 
-            is_persival= is_persival,
+            is_percival= is_percival,
             is_morigana= is_morigana
         )
-
-    # 결과 생성
-    selected_roles = selected_roles if selected_roles else []
-    results = []
-    for _, row in df.iterrows():
-        role = (" (퍼시벌)" if "percival" in selected_roles and random.random() < 0.3 else
-               " (모르가나)" if "morgana" in selected_roles and random.random() < 0.3 else "")
-        result = random.choice(["합격 🎉", "불합격 😢", "보류 🤔", "통과 ✅", "실패 ❌"]) + role
-        results.append((row['name'], row['email'], result))
+    stored_results = generate_player_info(
+        distributor_result,
+        stored_df
+    )
+    # # 결과 생성
+    # selected_roles = selected_roles if selected_roles else []
+    # results = []
+    # for _, row in df.iterrows():
+    #     role = (" (퍼시벌)" if "percival" in selected_roles and random.random() < 0.3 else
+    #            " (모르가나)" if "morgana" in selected_roles and random.random() < 0.3 else "")
+    #     result = random.choice(["합격 🎉", "불합격 😢", "보류 🤔", "통과 ✅", "실패 ❌"]) + role
+    #     results.append((row['name'], row['email'], result))
     
-    stored_results = results
-    result_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # stored_results = results
+    result_timestamp = datetime.now().strftime("%m.%d %H:%M:%S")
     
-    return dbc.Alert("이메일이 발송되었습니다!", color="success"), {"display": "block"}
-
+    return dbc.Alert(f'''
+                     📧 이메일이 발송되었습니다! ({result_timestamp})
+                     - 👼 선인 : {sum(1 for v in stored_results.values() if v['role'].isin(['good', 'merlin','percival']))}명 (멀린 : {sum(1 for v in stored_results.values() if v['role'] == 'merlin')}명, 일반 선인 {sum(1 for v in stored_results.values() if v['role'] == 'good')}명, 퍼시발 {sum(1 for v in stored_results.values() if v['role'] == 'percival')}명)
+                     - 😈 악인 : {sum(1 for v in stored_results.values() if v['role'].isin(['bad', 'morgana']))}명 (모르가나 : {sum(1 for v in stored_results.values() if v['role'] == 'morgana')}명, 일반 악인 {sum(1 for v in stored_results.values() if v['role'] == 'bad')}명)
+                     ''', color="success"), {"display": "block"}
 
 # 콜백: 모달 표시/숨김
 @app.callback(
@@ -310,12 +315,27 @@ def show_results(n_clicks):
     if stored_results is None:
         return dbc.Alert("아직 이메일을 보내지 않았습니다!", color="warning")
     
-    return [
-        dbc.Alert(f"{result_timestamp} 기준 결과:", color="info", className="mb-3"),
-        *[dbc.Alert(f"{name} ({email}): {result}", color="info", className="mb-2") 
-          for name, email, result in stored_results]
-    ]
+    # return [\
+    #     dbc.Alert(f"{result_timestamp} 기준 결과:", color="info", className="mb-3"),
+    #     *[\
+    #        dbc.Alert(f"{name} ({email}): {result}", color="info", className="mb-2") 
+    #       for name, email, result in stored_results
+    # ]
 
+    return [
+        dbc.Alert(
+            [
+                f"{result_timestamp} 기준 결과:\n",
+                *[
+                    f"{'🔴' if value['role'] in ['bad', 'morgana'] else '🔵'} {value['name']} : {value['role']}\n"
+                    for key, value in stored_results.items()
+                ]
+            ],
+            color="info",
+            className="mb-3",
+            style={'white-space': 'pre-line'}  # 줄바꿈을 보존하기 위해 추가
+        )
+    ]
 
 # 초기 한 쌍의 입력 필드 표시
 @app.callback(
