@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>새 게임 세션 생성</title>
+</head>
+<body>
+    <h1>새 게임 세션 생성</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">세션 만들기</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>게임 로비</title>
+</head>
+<body>
+    <h1>게임 로비: {{ game_session.session_id }}</h1>
+    <p>환영합니다, {{ player.nickname }}님!</p>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2>참여자 목록</h2>
+    <ul>
+        {% for p in players_in_session %}
+            <li>{{ p.nickname }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>세션 공유 링크</h2>
+    <p>친구를 초대하세요: <a href="{{ session_link }}">{{ session_link }}</a></p>
+
+    <p>게임 시작 버튼 또는 다른 게임 기능이 여기에 추가됩니다.</p>
+</body>
+</html>
