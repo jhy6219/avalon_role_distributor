@@ -4,27 +4,89 @@
     <title>게임 로비</title>
 </head>
 <body>
-    <h1>게임 로비: {{ game_session.session_id }}</h1>
-    <p>환영합니다, {{ player.nickname }}님!</p>
+    <h1>게임 로비 - 세션 ID: {{ game_session.session_id }}</h1>
+    <p><strong>플레이어:</strong> {{ player_nickname }}</p>
 
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <h2>참여자 목록</h2>
-    <ul>
-        {% for p in players_in_session %}
-            <li>{{ p.nickname }}</li>
+    <h2>현재 참여 중인 플레이어</h2>
+    <ul id="player-list">
+        {% for player in players_in_session %}
+            <li>
+                {{ player.nickname }}
+                {% if player_nickname == host_nickname and player.nickname != player_nickname %}
+                    <form method="post" action="{% url 'kick_player' game_session.session_id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="target_nickname" value="{{ player.nickname }}">
+                        <input type="hidden" name="nickname" value="{{ player_nickname }}">
+                        <button type="submit">제거</button>
+                    </form>
+                {% endif %}
+            </li>
         {% endfor %}
     </ul>
 
-    <h2>세션 공유 링크</h2>
-    <p>친구를 초대하세요: <a href="{{ session_link }}">{{ session_link }}</a></p>
+    <p><strong>세션 공유 링크:</strong></p>
+    <p><a href="{{ session_link }}">{{ session_link }}</a></p>
 
-    <p>게임 시작 버튼 또는 다른 게임 기능이 여기에 추가됩니다.</p>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <script>
+    const playerNickname = "{{ player_nickname }}";
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    function updatePlayerList() {
+        fetch("{% url 'get_players' game_session.session_id %}")
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById("player-list");
+                list.innerHTML = '';
+
+                data.players.forEach(function(nickname) {
+                    const li = document.createElement("li");
+                    li.textContent = nickname;
+
+                    if (playerNickname === data.host_nickname && nickname !== playerNickname) {
+                        const form = document.createElement("form");
+                        form.method = "post";
+                        form.action = "{% url 'kick_player' game_session.session_id %}";
+                        form.style.display = "inline";
+
+                        const csrfToken = "{{ csrf_token }}";  // 서버에서 렌더링된 값을 직접 넘기기 어렵다면 생략
+                        const csrfInput = document.createElement("input");
+                        csrfInput.type = "hidden";
+                        csrfInput.name = "csrfmiddlewaretoken";
+                        csrfInput.value = csrfToken;
+
+                        const targetInput = document.createElement("input");
+                        targetInput.type = "hidden";
+                        targetInput.name = "target_nickname";
+                        targetInput.value = nickname;
+
+                        const meInput = document.createElement("input");
+                        meInput.type = "hidden";
+                        meInput.name = "nickname";
+                        meInput.value = playerNickname;
+
+                        const button = document.createElement("button");
+                        button.type = "submit";
+                        button.textContent = "제거";
+
+                        form.appendChild(csrfInput);
+                        form.appendChild(targetInput);
+                        form.appendChild(meInput);
+                        form.appendChild(button);
+
+                        li.appendChild(form);
+                    }
+
+                    list.appendChild(li);
+            });
+        });
+    }
+
+
+    // 5초마다 갱신
+    setInterval(updatePlayerList, 3000);
+    </script>
+
+
 </body>
 </html>
