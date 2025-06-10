@@ -1,3 +1,5 @@
+import json
+import hashlib
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
@@ -6,14 +8,14 @@ from django.urls import reverse
 from .models import GameSession, Player
 
 
-def home(request: HttpRequest):
+def home(request:HttpRequest):
     if request.method == 'POST':
         game_session = GameSession.objects.create()
         return redirect('join', session_id=game_session.session_id)
     return render(request, 'game/home.html')
 
 
-def join(request: HttpRequest, session_id):
+def join(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
 
     if not game_session.is_active:
@@ -60,7 +62,7 @@ def join(request: HttpRequest, session_id):
     return render(request, 'game/join.html', {'game_session': game_session})
 
 
-def lobby(request: HttpRequest, session_id):
+def lobby(request:HttpRequest, session_id):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
 
@@ -86,42 +88,59 @@ def lobby(request: HttpRequest, session_id):
     except Player.DoesNotExist:
         return render(request, 'game/kicked.html', {
             'message': '이 세션에서 퇴장당했거나 존재하지 않는 사용자입니다.',
+            'game_session': game_session,
         })
 
     return render(request, 'game/lobby.html', {
         'game_session': game_session,
         'player_nickname': nickname,
+        'player_pin': pin,
         'players_in_session': game_session.players.all(),
         'session_link': request.build_absolute_uri(reverse('join', args=[session_id])),
         'host_nickname': game_session.host_nickname,
     })
 
 
-def get_players(request, session_id):
+def get_players(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
 
     if not game_session.is_active:
         return JsonResponse({'players': []})
 
-    players = game_session.players.all().values_list('nickname', flat=True)
+    player_names = list(game_session.players.all().values_list('nickname', flat=True))
+
+    # 플레이어 목록을 기준으로 해시 생성
+    players_hash = hashlib.md5(json.dumps(sorted(player_names)).encode()).hexdigest()
+    client_hash = request.GET.get('hash')
+
+    if client_hash and client_hash == players_hash:
+        return JsonResponse({}, status=204)  # 변경 없음
+
     return JsonResponse({
-        'players': list(players),
+        'players': player_names,
         'host_nickname': game_session.host_nickname,
+        'hash': players_hash,
     })
 
 
-def kick_player(request, session_id):
+def kick_player(request:HttpRequest, session_id):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
 
     game_session = get_object_or_404(GameSession, session_id=session_id)
     target_nickname = request.POST.get('target_nickname')
     kicker_nickname = request.POST.get('nickname')
+    kicker_pin = request.POST.get('pin')
 
     if not game_session.is_active:
         return render(request, 'game/ended.html', {'message': '종료된 세션입니다.'})
 
-    # 🛡 관리자 확인
+    if target_nickname == kicker_nickname:
+        return render(request, 'game/kicked.html', {
+            'message': '자기 자신은 제거할 수 없습니다.',
+            'game_session': game_session,
+        })
+
     if kicker_nickname != game_session.host_nickname:
         return render(request, 'game/kicked.html', {
             'message': '관리자만 참가자를 제거할 수 있습니다.',
@@ -133,5 +152,5 @@ def kick_player(request, session_id):
     except Player.DoesNotExist:
         pass
 
-    query = urlencode({'nickname': kicker_nickname})
+    query = urlencode({'nickname': kicker_nickname, 'pin': kicker_pin})
     return redirect(f"{reverse('lobby', args=[session_id])}?{query}")

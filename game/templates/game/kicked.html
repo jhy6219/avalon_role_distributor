@@ -7,6 +7,9 @@
 <body>
     <h1>게임 입장 불가</h1>
     <p>{{ message }}</p>
-    <a href="{% url 'home' %}">홈으로 돌아가기</a>
+
+    <form action="{% url 'join' game_session.session_id %}" method="get">
+        <button type="submit">다시 참여하기</button>
+    </form>
 </body>
 </html>

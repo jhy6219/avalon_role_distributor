@@ -2,54 +2,67 @@
 <html>
 <head>
     <title>게임 로비</title>
+    <style>
+        #player-list td {
+            padding: 0em 0.2em;
+        }
+        #player-list button {
+            margin-right: 0.1em;
+        }
+        </style>
 </head>
 <body>
     <h1>게임 로비 - 세션 ID: {{ game_session.session_id }}</h1>
     <p><strong>플레이어:</strong> {{ player_nickname }}</p>
 
     <h2>현재 참여 중인 플레이어</h2>
-    <ul id="player-list">
-        {% for player in players_in_session %}
-            <li>
-                {{ player.nickname }}
-                {% if player_nickname == host_nickname and player.nickname != player_nickname %}
-                    <form method="post" action="{% url 'kick_player' game_session.session_id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="target_nickname" value="{{ player.nickname }}">
-                        <input type="hidden" name="nickname" value="{{ player_nickname }}">
-                        <button type="submit">제거</button>
-                    </form>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+    <table id="player-list">
+        <tbody><tr><td colspan="2">플레이어 리스트 불러오는 중...</td></tr></tbody>
+    </table >
 
-    <p><strong>세션 공유 링크:</strong></p>
-    <p><a href="{{ session_link }}">{{ session_link }}</a></p>
+    <h2>세션 공유 링크</h2>
+    <p>
+        <input type="text" id="session-link" value="{{ session_link }}" readonly style="width: 100px;">
+        <button onclick="copySessionLink()">복사</button>
+    </p>
+    <p id="copy-message" style="color: green;"></p>
+
 
     <meta name="csrf-token" content="{{ csrf_token }}">
-
     <script>
+    let lastHash = null;
     const playerNickname = "{{ player_nickname }}";
+    const playerPin = "{{ player_pin }}";
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     function updatePlayerList() {
-        fetch("{% url 'get_players' game_session.session_id %}")
-            .then(response => response.json())
+        const url = new URL("{% url 'get_players' game_session.session_id %}", window.location.origin);
+        if (lastHash) {
+            url.searchParams.append('hash', lastHash)
+        };
+
+        fetch(url)
+            .then(response => {
+                if (response.status === 204) { 
+                    return; // 변경 없음, 아무것도 하지 않음
+                }
+                return response.json();
+            })
             .then(data => {
-                const list = document.getElementById("player-list");
-                list.innerHTML = '';
+                if (!data || !data.players) {
+                    return;
+                }
+                
+                const tableBody = document.getElementById("player-list");
+                tableBody.innerHTML = '';
 
                 data.players.forEach(function(nickname) {
-                    const li = document.createElement("li");
-                    li.textContent = nickname;
-
+                    const row = document.createElement("tr");
+                    const removeCell = document.createElement("td");
                     if (playerNickname === data.host_nickname && nickname !== playerNickname) {
                         const form = document.createElement("form");
                         form.method = "post";
                         form.action = "{% url 'kick_player' game_session.session_id %}";
-                        form.style.display = "inline";
 
-                        const csrfToken = "{{ csrf_token }}";  // 서버에서 렌더링된 값을 직접 넘기기 어렵다면 생략
                         const csrfInput = document.createElement("input");
                         csrfInput.type = "hidden";
                         csrfInput.name = "csrfmiddlewaretoken";
@@ -60,31 +73,62 @@
                         targetInput.name = "target_nickname";
                         targetInput.value = nickname;
 
-                        const meInput = document.createElement("input");
-                        meInput.type = "hidden";
-                        meInput.name = "nickname";
-                        meInput.value = playerNickname;
+                        const myInput = document.createElement("input");
+                        myInput.type = "hidden";
+                        myInput.name = "nickname";
+                        myInput.value = playerNickname;
+                        
+                        const myInput2 = document.createElement("input");
+                        myInput2.type = "hidden";
+                        myInput2.name = "pin";
+                        myInput2.value = playerPin;
 
                         const button = document.createElement("button");
                         button.type = "submit";
-                        button.textContent = "제거";
+                        button.textContent = "❌";
 
                         form.appendChild(csrfInput);
                         form.appendChild(targetInput);
-                        form.appendChild(meInput);
+                        form.appendChild(myInput);
+                        form.appendChild(myInput2);
                         form.appendChild(button);
-
-                        li.appendChild(form);
+                        removeCell.appendChild(form);
                     }
 
-                    list.appendChild(li);
-            });
-        });
+                    const nameCell = document.createElement("td");
+                    nameCell.textContent = nickname;
+
+                    row.append(removeCell, nameCell);
+                    tableBody.appendChild(row);
+                });
+                lastHash = data.hash;
+            })
+            .catch(err => console.error("플레이어 목록 갱신 실패:", err));
     }
 
+    setInterval(updatePlayerList, 1000); // ms
 
-    // 5초마다 갱신
-    setInterval(updatePlayerList, 3000);
+    
+    function copySessionLink() {
+        const input = document.getElementById("session-link");
+        input.select();
+        input.setSelectionRange(0, 99999); // 모바일 대응
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                document.getElementById("copy-message").textContent = "클립보드에 복사되었습니다!";
+            } else {
+                document.getElementById("copy-message").textContent = "복사에 실패했습니다.";
+            }
+        } catch (err) {
+            document.getElementById("copy-message").textContent = "이 브라우저는 복사를 지원하지 않습니다.";
+        }
+
+        setTimeout(() => {
+            document.getElementById("copy-message").textContent = "";
+        }, 2000);
+    }
     </script>
 
 
