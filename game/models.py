@@ -6,20 +6,22 @@ class GameSession(models.Model):
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     host_nickname = models.CharField(max_length=50, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
 
     option1 = models.BooleanField(default=False)
     option2 = models.BooleanField(default=False)
     option3 = models.BooleanField(default=False)
+    
+    is_active = models.BooleanField(default=True)
+    is_started = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Game Session: {self.session_id}"
 
+
 class Player(models.Model):
     game_session = models.ForeignKey(GameSession, on_delete=models.CASCADE, related_name='players')
-    nickname = models.CharField(max_length=50, unique=False) # 세션 내에서만 유니크
-    pin = models.CharField(max_length=128) # 비밀번호는 해싱해서 저장하는 것이 좋습니다.
-    # 나중에 Player의 Session Key를 저장하여 재접속 시 활용할 수 있습니다.
+    nickname = models.CharField(max_length=50, unique=False)
+    pin = models.CharField(max_length=128)
     session_key = models.CharField(max_length=40, null=True, blank=True)
 
     class Meta:
