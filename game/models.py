@@ -8,6 +8,10 @@ class GameSession(models.Model):
     host_nickname = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
+    option1 = models.BooleanField(default=False)
+    option2 = models.BooleanField(default=False)
+    option3 = models.BooleanField(default=False)
+
     def __str__(self):
         return f"Game Session: {self.session_id}"
 

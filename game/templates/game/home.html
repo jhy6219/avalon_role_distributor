@@ -7,6 +7,10 @@
     <h1>새 게임 세션 생성</h1>
     <form method="post">
         {% csrf_token %}
+        <h2>게임 옵션 선택</h2>
+        <label><input type="checkbox" id="option1" name="option1" value="true"> 옵션 1 </label><br>
+        <label><input type="checkbox" id="option2" name="option2" value="true"> 옵션 2 </label><br>
+        <label><input type="checkbox" id="option3" name="option3" value="true"> 옵션 3 </label><br><br>
         <button type="submit">세션 만들기</button>
     </form>
 </body>

@@ -15,10 +15,29 @@
     <h1>게임 로비 - 세션 ID: {{ game_session.session_id }}</h1>
     <p><strong>플레이어:</strong> {{ player_nickname }}</p>
 
+    <h2>게임 옵션</h2>
+    <ul id="selected-options">
+        {% if game_session.option1 %}
+            <li>옵션 1: 활성화됨</li>
+        {% endif %}
+        {% if game_session.option2 %}
+            <li>옵션 2: 활성화됨</li>
+        {% endif %}
+        {% if game_session.option3 %}
+            <li>옵션 3: 활성화됨</li>
+        {% endif %}
+        {# 만약 선택된 옵션이 하나도 없다면 표시할 메시지 #}
+        {% if not game_session.option1 and not game_session.option2 and not game_session.option3 %}
+            <li>선택된 게임 옵션이 없습니다.</li>
+        {% endif %}
+    </ul>
+
+
     <h2>현재 참여 중인 플레이어</h2>
     <table id="player-list">
         <tbody><tr><td colspan="2">플레이어 리스트 불러오는 중...</td></tr></tbody>
     </table >
+
 
     <h2>세션 공유 링크</h2>
     <p>

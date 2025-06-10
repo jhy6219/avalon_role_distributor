@@ -10,8 +10,16 @@ from .models import GameSession, Player
 
 def home(request:HttpRequest):
     if request.method == 'POST':
-        game_session = GameSession.objects.create()
+        op1 = request.POST.get('option1') == 'true'
+        op2 = request.POST.get('option2') == 'true'
+        op3 = request.POST.get('option3') == 'true'
+        game_session = GameSession.objects.create(
+            option1=op1,
+            option2=op2,
+            option3=op3
+        )
         return redirect('join', session_id=game_session.session_id)
+    
     return render(request, 'game/home.html')
 
 
@@ -68,7 +76,7 @@ def lobby(request:HttpRequest, session_id):
 
     game_session = get_object_or_404(GameSession, session_id=session_id)
 
-    # ⛔️ 종료된 세션일 경우 입장 불가
+    # 종료된 세션일 경우 입장 불가
     if not game_session.is_active:
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
