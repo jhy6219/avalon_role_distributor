@@ -18,6 +18,10 @@ def home(request:HttpRequest):
             option2=op2,
             option3=op3
         )
+
+        game_session.is_active = True
+        game_session.save()
+
         return redirect('join', session_id=game_session.session_id)
     
     return render(request, 'game/home.html')
@@ -174,10 +178,41 @@ def role(request:HttpRequest, session_id):
     })
 
 
-def ended(request, session_id):
+
+def end_game(request:HttpRequest, session_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    game_session = get_object_or_404(GameSession, session_id=session_id)
+
+    if not game_session.is_active:
+        return JsonResponse({'status': 'error', 'message': '이미 종료된 게임입니다.'}, status=400)
+
+
+    nickname = request.POST.get('nickname') 
+    pin = request.POST.get('pin')
+
+    if nickname != game_session.host_nickname:
+        return JsonResponse({'status': 'error', 'message': '게임 종료 권한이 없습니다.'}, status=403)
+    
+    try:
+        host_player = Player.objects.get(game_session=game_session, nickname=nickname)
+        if not check_password(pin, host_player.pin):
+            return JsonResponse({'status': 'error', 'message': '인증 실패.'}, status=401)
+    except Player.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': '호스트 정보를 찾을 수 없습니다.'}, status=404)
+
+
+    game_session.is_active = False  
+    game_session.save()
+
+    return redirect('ended', session_id=session_id)
+
+
+def ended(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
     return render(request, 'game/ended.html', {
-            'message': '게임 종료.',
+            'message': f'세션 {session_id}은(는) 종료되었습니다.',
             'game_session': game_session,
         })
 
@@ -206,6 +241,7 @@ def get_state(request:HttpRequest, session_id):
         'players': player_names,
         'host_nickname': game_session.host_nickname,
         'hash': state_hash,
+        'is_active': game_session.is_active,
         'is_started': game_session.is_started,
     })
 

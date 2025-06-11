@@ -79,8 +79,13 @@
                 if (!data || !data.players) {
                     return;
                 }
-                                
-                if (data.is_started) {
+
+                if (data.is_active === false) {
+                    window.location.href = "{% url 'ended' game_session.session_id %}";
+                    return;
+                }
+
+                if (data.is_started === true) {
                     window.location.href = "{% url 'role' game_session.session_id %}?nickname=" + playerNickname + "&pin=" + playerPin;
                     return;
                 }

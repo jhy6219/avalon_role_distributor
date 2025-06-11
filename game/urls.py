@@ -13,5 +13,6 @@ urlpatterns = [
     path('start_game/<uuid:session_id>/', views.start_game, name='start_game'),
     path('role/<uuid:session_id>/', views.role, name='role'),
     
+    path('end_game/<uuid:session_id>/', views.end_game, name='end_game'),
     path('ended/<uuid:session_id>/', views.ended, name='ended'),
 ]

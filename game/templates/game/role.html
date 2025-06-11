@@ -42,7 +42,7 @@
     <p>이곳에 당신의 역할이나 게임 목표 등 구체적인 게임 진행 내용을 추가할 수 있습니다.</p>
 
     {% if player_nickname == game_session.host_nickname %}
-        <form id="end-game-form" method="post" action="{% url 'ended' game_session.session_id %}">
+        <form id="end-game-form" method="post" action="{% url 'end_game' game_session.session_id %}">
             {% csrf_token %}
             <input type="hidden" name="nickname" value="{{ player_nickname }}">
             <input type="hidden" name="pin" value="{{ player_pin }}">
