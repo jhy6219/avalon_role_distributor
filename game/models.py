@@ -24,6 +24,11 @@ class Player(models.Model):
     pin = models.CharField(max_length=128)
     session_key = models.CharField(max_length=40, null=True, blank=True)
 
+    role = models.CharField(max_length=128, blank=True)
+    role_intro  = models.CharField(max_length=1024, blank=True)
+    role_detail = models.CharField(max_length=1024, blank=True)
+    role_image  = models.CharField(max_length=1024, blank=True)
+
     class Meta:
         unique_together = ('game_session', 'nickname') # 한 세션 내에서 닉네임 중복 방지
 

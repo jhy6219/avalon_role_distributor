@@ -1,11 +1,14 @@
 import json
 import hashlib
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
 from urllib.parse import urlencode
 from django.urls import reverse
 from .models import GameSession, Player
+
+import ftn.generate_msg as avalon_role
 
 
 def home(request:HttpRequest):
@@ -126,26 +129,38 @@ def start_game(request:HttpRequest, session_id):
         return HttpResponseNotAllowed(['POST'])
 
     game_session = get_object_or_404(GameSession, session_id=session_id)
-    kicker_nickname = request.POST.get('nickname') # 게임 시작 요청자 (호스트여야 함)
-    kicker_pin = request.POST.get('pin')
+    nickname = request.POST.get('nickname') # 게임 시작 요청자 (호스트여야 함)
+    pin = request.POST.get('pin')
 
-    if kicker_nickname != game_session.host_nickname:
+    if nickname != game_session.host_nickname:
         return JsonResponse({'status': 'error', 'message': '게임 시작 권한이 없습니다.'}, status=403)
-    
-    # 호스트의 PIN 확인 (선택 사항, 보안 강화)
+
     try:
-        host_player = Player.objects.get(game_session=game_session, nickname=kicker_nickname)
-        if not check_password(kicker_pin, host_player.pin):
+        host_player = Player.objects.get(game_session=game_session, nickname=nickname)
+        if not check_password(pin, host_player.pin):
             return JsonResponse({'status': 'error', 'message': '인증 실패.'}, status=401)
     except Player.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': '호스트 정보를 찾을 수 없습니다.'}, status=404)
 
 
+    # 역할 분배
+    players = [player.nickname for player in list(game_session.players.all())]
+    enable_persival = game_session.option1 == True
+    enable_morgana  = game_session.option2 == True
+    
+    # distribution_result = avalon_role.distributor(players, enable_persival, enable_morgana)
+    distribution_result = avalon_role.distributor(['a', 'b', 'c', 'd', 'e'], enable_persival, enable_morgana)
+    # for role, assignees in distribution_result.items():
+    #     for player in assignees:
+    #         role_intro  = avalon_role.messages[role]['bold']
+    #         role_detail = avalon_role.messages[role]['desc']
+    #         print(f"{player}: {role_intro}")
+    
+
     game_session.is_started = True
     game_session.save()
 
-    # 게임 시작 후 role 페이지로 리다이렉트
-    query = urlencode({'nickname': kicker_nickname, 'pin': kicker_pin})
+    query = urlencode({'nickname': nickname, 'pin': pin})
     return HttpResponseRedirect(f"{reverse('role', args=[session_id])}?{query}")
 
 
