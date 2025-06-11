@@ -2,14 +2,8 @@
 <html>
 <head>
     <title>게임 로비</title>
-    <style>
-        #player-list td {
-            padding: 0em 0.2em;
-        }
-        #player-list button {
-            margin-right: 0.1em;
-        }
-        </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
 </head>
 <body>
     <h1>게임 로비 - 세션 ID: {{ game_session.session_id }}</h1>

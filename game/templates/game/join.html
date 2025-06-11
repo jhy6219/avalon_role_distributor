@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>게임 세션 참여</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
 </head>
 <body>
     <h1>게임 세션 참여: {{ game_session.session_id }}</h1>

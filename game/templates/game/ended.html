@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>게임 세션 종료</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
 </head>
 <body>
     <h1>게임 종료 - 세션 ID: {{ game_session.session_id }}</h1>

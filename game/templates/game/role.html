@@ -2,19 +2,8 @@
 <html>
 <head>
     <title>게임 시작 - 역할 확인</title>
-    <style>
-        #player-list td {
-            padding: 0em 0.2em;
-        }
-
-        .responsive-image {
-            width: 100%;
-            height: auto;
-            padding-left: 5%;
-            padding-right: 5%;
-            box-sizing: border-box;
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
 </head>
 <body>
     <h1>게임 시작! - 세션 ID: {{ game_session.session_id }}</h1>
