@@ -33,6 +33,13 @@ def join(request:HttpRequest, session_id):
     if not game_session.is_active:
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
+            'game_session': game_session,
+        })
+    
+    if game_session.is_started:
+        return render(request, 'game/ended.html', {
+            'message': '이미 시작된 게임 세션입니다.',
+            'game_session': game_session,
         })
 
     if request.method == 'POST':
@@ -84,6 +91,7 @@ def lobby(request:HttpRequest, session_id):
     if not game_session.is_active:
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
+            'game_session': game_session,
         })
 
     nickname = request.GET.get('nickname')
@@ -147,6 +155,7 @@ def role(request:HttpRequest, session_id):
     if not game_session.is_active:
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
+            'game_session': game_session,
         })
 
     if not game_session.is_started:
