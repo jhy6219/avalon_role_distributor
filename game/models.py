@@ -1,5 +1,6 @@
 # game/models.py
 from django.db import models
+from django.utils.safestring import mark_safe
 import uuid
 
 class GameSession(models.Model):
@@ -25,9 +26,13 @@ class Player(models.Model):
     session_key = models.CharField(max_length=40, null=True, blank=True)
 
     role = models.CharField(max_length=128, blank=True)
-    role_intro  = models.CharField(max_length=1024, blank=True)
-    role_detail = models.CharField(max_length=1024, blank=True)
-    role_image  = models.CharField(max_length=1024, blank=True)
+    role_intro  = models.TextField()
+    role_detail = models.TextField()
+    role_image  = models.TextField()
+
+    @property
+    def safe_role_detail(self):
+        return mark_safe(self.role_detail)
 
     class Meta:
         unique_together = ('game_session', 'nickname') # 한 세션 내에서 닉네임 중복 방지

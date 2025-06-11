@@ -48,7 +48,9 @@ messages = {
     },
     "merlin": {
         "bold": "🧙‍♂️ 당신은 멀린입니다.",
-        "desc": "악인을 찾아내고 선인들을 지켜야 합니다! \n악인은 {bad_players} 입니다."
+        "desc": "악인을 찾아내고 선인들을 지켜야 합니다!\n"
+                "단, 암살자에게 들키지 않도록 조심하세요!\n"
+                "악인은 {bad_players} 입니다."
     },
     "percival-with-morgana": {
         "bold": "🛡️ 당신은 선인 퍼시발입니다.",
@@ -182,17 +184,17 @@ def distribution_post_process(raw:Dict[str, List]) -> Dict[str, dict]:
             role_detail = role_msg['desc']
             
             role_img_name = normal_role_imgs[role].pop() if role in ['bad', 'good'] else role
-            role_img = f'./media/{role_img_name}.png'
+            role_img = f'/media/{role_img_name}.png'
 
             if role in roles_knowing_bad_guys:
                 others = set(raw['bad']) - {player}
-                role_detail = role_detail.format(bad_players=", ".join(others))
+                role_detail = role_detail.format(bad_players='<strong>' + ', '.join(others) + '</strong>')
             elif role == 'percival':
                 if filtered['morgana']:
                     candidates = filtered['merlin'] + filtered['morgana']
-                    role_detail = role_detail.format(merlin_candidates=", ".join(candidates))
+                    role_detail = role_detail.format(merlin_candidates='<strong>' + ', '.join(candidates) + '</strong>')
                 else:
-                    role_detail = role_detail.format(merlin=filtered['merlin'][0])
+                    role_detail = role_detail.format(merlin='<strong>' + filtered['merlin'][0] + '</strong>')
 
             res[player] = {
                 'role':   role,

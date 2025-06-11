@@ -4,8 +4,8 @@ import hashlib
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
-from urllib.parse import urlencode
 from django.urls import reverse
+from urllib.parse import urlencode
 from .models import GameSession, Player
 
 import ftn.generate_msg as avalon_role
@@ -148,8 +148,10 @@ def start_game(request:HttpRequest, session_id):
     enable_persival = game_session.option1 == True
     enable_morgana  = game_session.option2 == True
     
-    # distribution_result = avalon_role.distributor(players, enable_persival, enable_morgana)
-    distrb_raw = avalon_role.distributor(['1', 'b', 'c', 'd', 'e'], enable_persival, enable_morgana)
+    if len(players) < 5:
+        players += [f'dummy_{i}' for i in range(5-len(players))]
+
+    distrb_raw = avalon_role.distributor(players, enable_persival, enable_morgana)
     distrb = avalon_role.distribution_post_process(distrb_raw)
     for assignee, description in distrb.items():
         try:
@@ -204,6 +206,8 @@ def role(request:HttpRequest, session_id):
         'player_pin': player_pin,
         'players_in_session': game_session.players.all(),
         'host_nickname': game_session.host_nickname,
+        'player': player,
+        'role_detail': player.safe_role_detail
     })
 
 

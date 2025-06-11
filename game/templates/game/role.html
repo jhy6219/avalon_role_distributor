@@ -6,6 +6,14 @@
         #player-list td {
             padding: 0em 0.2em;
         }
+
+        .responsive-image {
+            width: 100%;
+            height: auto;
+            padding-left: 5%;
+            padding-right: 5%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -38,8 +46,9 @@
         </tbody>
     </table>
 
-    <p>게임에 오신 것을 환영합니다! 이제 게임 규칙에 따라 진행됩니다.</p>
-    <p>이곳에 당신의 역할이나 게임 목표 등 구체적인 게임 진행 내용을 추가할 수 있습니다.</p>
+    <img src="{{ player.role_image }}" alt="{{ player.role }}" class="responsive-image">
+    <h3> {{ player.role_intro }} </h3>
+    <p> {{ role_detail }} </p>
 
     {% if player_nickname == game_session.host_nickname %}
         <form id="end-game-form" method="post" action="{% url 'end_game' game_session.session_id %}">
