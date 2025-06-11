@@ -48,7 +48,7 @@
 
     <img src="{{ player.role_image }}" alt="{{ player.role }}" class="responsive-image">
     <h3> {{ player.role_intro }} </h3>
-    <p> {{ role_detail }} </p>
+    <p> {{ role_detail|linebreaksbr  }} </p>
 
     {% if player_nickname == game_session.host_nickname %}
         <form id="end-game-form" method="post" action="{% url 'end_game' game_session.session_id %}">

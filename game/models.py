@@ -3,6 +3,9 @@ from django.db import models
 from django.utils.safestring import mark_safe
 import uuid
 
+import ftn.generate_msg as avalon_role
+
+
 class GameSession(models.Model):
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -14,6 +17,29 @@ class GameSession(models.Model):
     
     is_active = models.BooleanField(default=True)
     is_started = models.BooleanField(default=False)
+
+
+    def distribute_roles(self):
+        players = [player.nickname for player in list(self.players.all())]
+        enable_persival = self.option1 == True
+        enable_morgana  = self.option2 == True
+        
+        if len(players) < 5:
+            players += [f'dummy_{i}' for i in range(9-len(players))]
+
+        distrb_raw = avalon_role.distributor(players, enable_persival, enable_morgana)
+        distrb = avalon_role.distribution_post_process(distrb_raw)
+        for assignee, description in distrb.items():
+            try:
+                player = Player.objects.get(game_session=self, nickname=assignee)
+                player.role = description['role']
+                player.role_intro = description['intro']
+                player.role_detail = description['detail']
+                player.role_image = description['image']
+                player.save()
+            except Exception as e:
+                pass
+    
 
     def __str__(self):
         return f"Game Session: {self.session_id}"

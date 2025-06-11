@@ -8,8 +8,6 @@ from django.urls import reverse
 from urllib.parse import urlencode
 from .models import GameSession, Player
 
-import ftn.generate_msg as avalon_role
-
 
 def home(request:HttpRequest):
     if request.method == 'POST':
@@ -144,26 +142,8 @@ def start_game(request:HttpRequest, session_id):
 
 
     # 역할 분배
-    players = [player.nickname for player in list(game_session.players.all())]
-    enable_persival = game_session.option1 == True
-    enable_morgana  = game_session.option2 == True
-    
-    if len(players) < 5:
-        players += [f'dummy_{i}' for i in range(5-len(players))]
+    game_session.distribute_roles()
 
-    distrb_raw = avalon_role.distributor(players, enable_persival, enable_morgana)
-    distrb = avalon_role.distribution_post_process(distrb_raw)
-    for assignee, description in distrb.items():
-        try:
-            player = Player.objects.get(game_session=game_session, nickname=assignee)
-            player.role = description['role']
-            player.role_intro = description['intro']
-            player.role_detail = description['detail']
-            player.role_image = description['image']
-            player.save()
-        except Exception as e:
-            pass
-    
     game_session.is_started = True
     game_session.save()
 
