@@ -149,14 +149,19 @@ def start_game(request:HttpRequest, session_id):
     enable_morgana  = game_session.option2 == True
     
     # distribution_result = avalon_role.distributor(players, enable_persival, enable_morgana)
-    distribution_result = avalon_role.distributor(['a', 'b', 'c', 'd', 'e'], enable_persival, enable_morgana)
-    # for role, assignees in distribution_result.items():
-    #     for player in assignees:
-    #         role_intro  = avalon_role.messages[role]['bold']
-    #         role_detail = avalon_role.messages[role]['desc']
-    #         print(f"{player}: {role_intro}")
+    distrb_raw = avalon_role.distributor(['1', 'b', 'c', 'd', 'e'], enable_persival, enable_morgana)
+    distrb = avalon_role.distribution_post_process(distrb_raw)
+    for assignee, description in distrb.items():
+        try:
+            player = Player.objects.get(game_session=game_session, nickname=assignee)
+            player.role = description['role']
+            player.role_intro = description['intro']
+            player.role_detail = description['detail']
+            player.role_image = description['image']
+            player.save()
+        except Exception as e:
+            pass
     
-
     game_session.is_started = True
     game_session.save()
 

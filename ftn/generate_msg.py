@@ -1,6 +1,9 @@
 import random
 import os 
 import sys
+from typing import Dict, List
+from copy import deepcopy
+
 
 current_file_path = os.path.abspath(__file__)
 parent_dir = os.path.dirname(current_file_path)
@@ -30,7 +33,8 @@ def distributor(player_ids, is_percival, is_morgana):
         "merlin": (0, 1),
         "percival": (1, 1 + percival_player_no),
         "bad": (good_player_no, len(shuffled)+1),
-        "morgana": (good_player_no, good_player_no + morgana_player_no),
+        "assassin": (good_player_no, good_player_no + 1),
+        "morgana": (good_player_no + 1, good_player_no + 1 + morgana_player_no),
     }
 
     # ✅ 이 시점에 set으로 반환
@@ -48,8 +52,9 @@ messages = {
     },
     "percival-with-morgana": {
         "bold": "🛡️ 당신은 선인 퍼시발입니다.",
-        "desc": "멀린을 보호하고, 그의 정체를 추리해 선인들에게 희망을 주세요! \n"
-                "멀린은 {merlin_candidates} 중 한명이고,\n나머지 한명은 악인 모르가나입니다."
+        "desc": "멀린을 보호하고 선인들에게 희망을 주세요! \n"
+                "하지만 조심하세요. 모르가나가 멀린으로 위장하고 있습니다! \n"
+                "멀린은 {merlin_candidates} 중 한 명이고,\n나머지 한 명은 악인 모르가나입니다."
     },
     "percival-no-morgana": {
         "bold": "🛡️ 당신은 선인 퍼시발입니다.",
@@ -59,6 +64,11 @@ messages = {
     "bad": {
         "bold": "🗡️ 당신은 악인입니다.",
         "desc": "선인들을 속이고 혼란을 일으켜 어둠의 승리를 쟁취하세요! \n"
+                "함께하는 악인은 {bad_players} 입니다."
+    },
+    "assassin": {
+        "bold": "🗡️ 당신은 암살자입니다.",
+        "desc": "굿럭 \n"
                 "함께하는 악인은 {bad_players} 입니다."
     },
     "morgana": {
@@ -138,3 +148,57 @@ def generate_player_info(roles, user_info_df):
         user_info[player]["img"] = img
 
     return user_info
+
+
+def distribution_post_process(raw:Dict[str, List]) -> Dict[str, dict]:
+    filtered = deepcopy(raw)
+
+    # filtering out special roles
+    filtered['good'] = list(set(filtered['good']) - set(filtered['merlin']))
+    filtered['good'] = list(set(filtered['good']) - set(filtered['percival']))
+    filtered['bad']  = list(set(filtered['bad'])  - set(filtered['assassin']))
+    filtered['bad']  = list(set(filtered['bad'])  - set(filtered['morgana']))
+
+    # img selection
+    NUM_NORMAL_ROLE_IMGS = {'good': 5, 'bad': 3}
+    normal_role_imgs = dict()
+    for normal_role in ['good', 'bad']:
+        img_list = [f'{normal_role}_guy_{i}' for i in range(1, NUM_NORMAL_ROLE_IMGS[normal_role]+1)]
+        random.shuffle(img_list)
+        normal_role_imgs[normal_role] = img_list[:len(filtered[normal_role])]
+
+    # restructed dict for player
+    res = dict()
+    roles_knowing_bad_guys = ['merlin', 'assassin', 'morgana', 'bad']
+
+    for role, assignees in filtered.items():
+        if role == 'percival':
+            role_msg = messages['percival-with-morgana' if filtered['morgana'] else 'percival-no-morgana']
+        else:
+            role_msg = messages[role]
+
+        for player in assignees:
+            role_intro  = role_msg['bold']
+            role_detail = role_msg['desc']
+            
+            role_img_name = normal_role_imgs[role].pop() if role in ['bad', 'good'] else role
+            role_img = f'./media/{role_img_name}.png'
+
+            if role in roles_knowing_bad_guys:
+                others = set(raw['bad']) - {player}
+                role_detail = role_detail.format(bad_players=", ".join(others))
+            elif role == 'percival':
+                if filtered['morgana']:
+                    candidates = filtered['merlin'] + filtered['morgana']
+                    role_detail = role_detail.format(merlin_candidates=", ".join(candidates))
+                else:
+                    role_detail = role_detail.format(merlin=filtered['merlin'][0])
+
+            res[player] = {
+                'role':   role,
+                'intro':  role_intro,
+                'detail': role_detail,
+                'image':  role_img
+            }
+
+    return res
