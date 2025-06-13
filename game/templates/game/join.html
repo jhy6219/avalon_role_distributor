@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>게임 세션 참여</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>게임 세션 참여: {{ game_session.session_id }}</h1>
+{% extends 'game/includes/base.html' %}
+{% block head_title %}게임 참가{% endblock %}
+{% block page_title %}게임 참가{% endblock %}
 
+
+{% block content %} 
+    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
+        
     {% if message_text %}
         <div class="{{ message_level }}">{{ message_text }}</div>
     {% endif %}
@@ -18,7 +16,6 @@
         <input type="text" id="nickname" name="nickname" required><br><br>
         <label for="pin">PIN:</label>
         <input type="password" id="pin" name="pin" required><br><br>
-        <button type="submit">참여하기</button>
+        <button type="submit">참가하기</button>
     </form>
-</body>
-</html>
+{% endblock %}

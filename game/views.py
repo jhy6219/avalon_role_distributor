@@ -229,7 +229,7 @@ def end_game(request:HttpRequest, session_id):
 def ended(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
     return render(request, 'game/ended.html', {
-            'message': f'세션 {session_id}은(는) 종료되었습니다.',
+            'message': f'게임이 종료되었습니다.',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
         })

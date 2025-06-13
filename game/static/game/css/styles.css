@@ -22,13 +22,13 @@ h4 {
     font-size: clamp(1.3rem, 2.5vw + 0.4rem, 2rem);
 }
 
-p, span, li, a, label, input, button {
+p, span, li, a, label, input {
     font-size: clamp(1rem, 1.5vw + 0.1rem, 1.2rem);
     line-height: 1.6;
 }
 
 input[type="checkbox"] {
-    transform: scale(2); 
+    transform: scale(3); 
     margin-right: 5px; 
     -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
     -ms-transform: scale(1.5); /* IE 9 */
@@ -48,4 +48,6 @@ input[type="checkbox"] {
     padding-left: 5%;
     padding-right: 5%;
     box-sizing: border-box;
+    display: block;
+    margin: 0 auto;
 }

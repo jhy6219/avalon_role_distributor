@@ -1,20 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>게임 세션 종료</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>게임 종료 - 세션 ID: {{ game_session.session_id }}</h1>
-    <p>{{ message }}</p>
+{% extends 'game/includes/base.html' %}
+{% block head_title %}게임 종료{% endblock %}
+{% block page_title %}게임 종료{% endblock %}
+
+
+{% block content %}
+    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
+        <p>{{ message }}</p>
 
     <!-- 역할 공개 -->
     {% if game_session.is_started %}
     <table id="roles">
         <col style="width: 30%;">
-        <col style="width: 30%;">
         <col style="width: 40%;">
+        <col style="width: 30%;">
         <tbody>
             {% for player in players_in_session %}
                 <tr>
@@ -35,6 +33,4 @@
         </tbody>
     </table>
     {% endif %}
-
-</body>
-</html>
+{% endblock %}

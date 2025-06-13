@@ -1,43 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>게임 로비</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>게임 로비 - 세션 ID: {{ game_session.session_id }}</h1>
-    <p><strong>플레이어:</strong> {{ player_nickname }}</p>
-
-    <h2>게임 옵션</h2>
-    <ul id="selected-options">
-        {% if game_session.option1 %}
-            <li>옵션 1: 활성화됨</li>
-        {% endif %}
-        {% if game_session.option2 %}
-            <li>옵션 2: 활성화됨</li>
-        {% endif %}
-        {% if game_session.option3 %}
-            <li>옵션 3: 활성화됨</li>
-        {% endif %}
-        {# 만약 선택된 옵션이 하나도 없다면 표시할 메시지 #}
-        {% if not game_session.option1 and not game_session.option2 and not game_session.option3 %}
-            <li>선택된 게임 옵션이 없습니다.</li>
-        {% endif %}
-    </ul>
+{% extends 'game/includes/base.html' %}
+{% block head_title %}게임 로비{% endblock %}
+{% block page_title %}게임 로비{% endblock %}
 
 
-    <h2>현재 참여 중인 플레이어</h2>
+{% block content %} 
+    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
+
     <table id="player-list">
+        <thead><b>현재 참여 중인 플레이어</b></thead>
         <tbody><tr><td colspan="2">플레이어 리스트 불러오는 중...</td></tr></tbody>
     </table >
 
-
-    <h2>세션 공유 링크</h2>
-    <p>
-        <input type="text" id="session-link" value="{{ session_link }}" readonly style="width: 100px;">
-        <button onclick="copySessionLink()">복사</button>
-    </p>
+    <label for="session-link">🔗:</label>
+    <input type="text" id="session-link" value="{{ session_link }}" readonly style="width: 100px;">
+    <button onclick="copySessionLink()">복사</button>
     <p id="copy-message" style="color: green;"></p>
 
     {% if player_nickname == game_session.host_nickname %}
@@ -45,10 +21,14 @@
             {% csrf_token %}
             <input type="hidden" name="nickname" value="{{ player_nickname }}">
             <input type="hidden" name="pin" value="{{ player_pin }}">
-            <button type="submit" onclick="return confirm('정말로 게임을 시작하시겠습니까?');">게임 시작</button>
+            <button type="submit" class="start-game-button" onclick="return confirm('정말로 게임을 시작하시겠습니까?');">게임 시작</button>
         </form>
     {% endif %}
 
+{% endblock %}
+
+
+{% block extra_body %}
     <!-- 게임 상태 업데이트 -->
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script>
@@ -136,7 +116,4 @@
         }, 2000);
     }
     </script>
-
-
-</body>
-</html>
+{% endblock %}

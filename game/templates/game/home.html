@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>새 게임 세션 생성</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>새 게임 세션 생성</h1>
+{% extends 'game/includes/base.html' %}
+{% block head_title %}게임 생성{% endblock %}
+{% block page_title %}게임 생성{% endblock %}
+
+
+{% block content %} 
     <form method="post">
         {% csrf_token %}
         <h2>게임 옵션 선택</h2>
@@ -15,5 +12,4 @@
         <label><input type="checkbox" id="option3" name="option3" value="true"> 옵션 3 </label><br><br>
         <button type="submit">세션 만들기</button>
     </form>
-</body>
-</html>
+{% endblock %}

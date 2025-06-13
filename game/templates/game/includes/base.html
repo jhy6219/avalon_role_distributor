@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <h4>Avalon Role Distributor</h4>
+        <h1>{% block page_title %}{% endblock %}</h1>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block extra_body %}
+    {% endblock %}
+</body>
+</html>

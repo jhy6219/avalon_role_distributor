@@ -1,0 +1,31 @@
+<table id="game_config">
+<col style="width: 20%;">
+<col style="width: 80%;">
+<tbody>
+    <tr>
+        <th scope="row">세션 ID</th>
+        <td>{{ game_session.session_id }}</td>
+    </tr>
+    <tr>
+        <th scope="row">게임 옵션</th>
+        <td>
+            {% if game_session.option1 and game_session.option2 %}
+                퍼시벌, 모르가나
+            {% elif game_session.option1 %}
+                퍼시벌
+            {% elif game_session.option2 %}
+                모르가나
+            {% else %}
+                없음
+            {% endif %}
+        </td>
+    </tr>
+    {% if player_nickname %}
+    <tr>
+        <th scope="row">플레이어</th>
+        <td>{{ player_nickname }}</td>
+    </tr>
+    {% endif %}
+</tbody>
+</table>
+<br></br>

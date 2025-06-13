@@ -1,17 +1,12 @@
+{% extends 'game/includes/base.html' %}
+{% block head_title %}게임 입장 불가{% endblock %}
+{% block page_title %}게임 입장 불가{% endblock %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>추방됨</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>게임 입장 불가</h1>
+
+{% block content %} 
+    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
     <p>{{ message }}</p>
-
     <form action="{% url 'join' game_session.session_id %}" method="get">
         <button type="submit">다시 참여하기</button>
     </form>
-</body>
-</html>
+{% endblock %}
