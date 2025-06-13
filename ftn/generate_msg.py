@@ -187,11 +187,13 @@ def distribution_post_process(raw:Dict[str, List]) -> Dict[str, dict]:
             role_img = f'/media/{role_img_name}.png'
 
             if role in roles_knowing_bad_guys:
-                others = set(raw['bad']) - {player}
+                others = list(set(raw['bad']) - {player})
+                random.shuffle(others)
                 role_detail = role_detail.format(bad_players='<strong>' + ', '.join(others) + '</strong>')
             elif role == 'percival':
                 if filtered['morgana']:
-                    candidates = filtered['merlin'] + filtered['morgana']
+                    candidates = list(filtered['merlin'] + filtered['morgana'])
+                    random.shuffle(candidates)
                     role_detail = role_detail.format(merlin_candidates='<strong>' + ', '.join(candidates) + '</strong>')
                 else:
                     role_detail = role_detail.format(merlin='<strong>' + filtered['merlin'][0] + '</strong>')
