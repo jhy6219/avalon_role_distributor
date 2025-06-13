@@ -44,13 +44,13 @@ def distributor(player_ids, is_percival, is_morgana):
 messages = {
     "good": {
         "bold": "🕊️ 당신은 선인입니다.",
-        "desc": "정의와 진실의 편에 서서, 함께 협력해 악의 세력을 물리치세요!"
+        "desc": "정의와 진실의 편에 서서,\n함께 협력해 악의 세력을 물리치세요!"
     },
     "merlin": {
         "bold": "🧙‍♂️ 당신은 멀린입니다.",
         "desc": "악인을 알고 있는 지혜로운 예언자입니다.\n"
                 "선인들을 인도하되, 정체는 숨기세요. 암살자가 당신을 노리고 있습니다!\n"
-                "당신이 알고 있는 악인은 {bad_players} 입니다."
+                "악인은 {bad_players} 입니다."
     },
     "percival-with-morgana": {
         "bold": "🛡️ 당신은 퍼시발입니다.",
