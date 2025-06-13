@@ -1,6 +1,7 @@
 # game/models.py
 from django.db import models
 from django.utils.safestring import mark_safe
+from django.contrib.auth.hashers import make_password
 import uuid
 
 import ftn.generate_msg as avalon_role
@@ -24,8 +25,19 @@ class GameSession(models.Model):
         enable_persival = self.option1 == True
         enable_morgana  = self.option2 == True
         
-        if len(players) < 5:
-            players += [f'dummy_{i}' for i in range(9-len(players))]
+        if self.option3:
+            NUM_TOTAL_PLAYERS = 5
+            dummies = [f'dummy_{i}' for i in range(NUM_TOTAL_PLAYERS-len(players))]
+            if len(players) < 5:
+                players += dummies
+            
+            for i, dummy in enumerate(dummies):
+                Player.objects.create(
+                    game_session=self,
+                    nickname=dummy,
+                    pin=make_password(f'{i}')
+                )
+
 
         distrb_raw = avalon_role.distributor(players, enable_persival, enable_morgana)
         distrb = avalon_role.distribution_post_process(distrb_raw)

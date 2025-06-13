@@ -35,14 +35,9 @@ def join(request:HttpRequest, session_id):
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
             'game_session': game_session,
+            'players_in_session': game_session.players.all(),
         })
     
-    if game_session.is_started:
-        return render(request, 'game/ended.html', {
-            'message': '이미 시작된 게임 세션입니다.',
-            'game_session': game_session,
-        })
-
     if request.method == 'POST':
         nickname = request.POST.get('nickname')
         pin = request.POST.get('pin')
@@ -63,6 +58,13 @@ def join(request:HttpRequest, session_id):
                     'message_level': 'error',
                 })
         except Player.DoesNotExist:
+            if game_session.is_started:
+                return render(request, 'game/join.html', {
+                    'game_session': game_session,
+                    'message_text': '이미 시작된 게임입니다.',
+                    'message_level': 'error',
+                })
+            
             hashed_pin = make_password(pin)
             Player.objects.create(
                 game_session=game_session,
@@ -93,6 +95,7 @@ def lobby(request:HttpRequest, session_id):
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
             'game_session': game_session,
+            'players_in_session': game_session.players.all(),
         })
 
     nickname = request.GET.get('nickname')
@@ -158,6 +161,7 @@ def role(request:HttpRequest, session_id):
         return render(request, 'game/ended.html', {
             'message': '이 게임 세션은 종료되었습니다.',
             'game_session': game_session,
+            'players_in_session': game_session.players.all(),
         })
 
     if not game_session.is_started:
@@ -227,6 +231,7 @@ def ended(request:HttpRequest, session_id):
     return render(request, 'game/ended.html', {
             'message': f'세션 {session_id}은(는) 종료되었습니다.',
             'game_session': game_session,
+            'players_in_session': game_session.players.all(),
         })
 
 

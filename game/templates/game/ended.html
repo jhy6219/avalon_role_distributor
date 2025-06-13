@@ -8,5 +8,33 @@
 <body>
     <h1>게임 종료 - 세션 ID: {{ game_session.session_id }}</h1>
     <p>{{ message }}</p>
+
+    <!-- 역할 공개 -->
+    {% if game_session.is_started %}
+    <table id="roles">
+        <col style="width: 30%;">
+        <col style="width: 30%;">
+        <col style="width: 40%;">
+        <tbody>
+            {% for player in players_in_session %}
+                <tr>
+                    <td><h3>{{ player.nickname }}</h3></td>
+                    <td><img src="{{ player.role_image }}" alt="{{ player.role }}" class="responsive-image"></td>
+                    
+                    <td><h3>
+                        {% if player.role == "good" %}       선인
+                        {% elif player.role == "merlin" %}   멀린
+                        {% elif player.role == "percival" %} 퍼시벌
+                        {% elif player.role == "bad" %}      악인
+                        {% elif player.role == "assassin" %} 암살자
+                        {% elif player.role == "morgana" %}  모르가나
+                        {% endif %}
+                    </h3></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
 </body>
 </html>
