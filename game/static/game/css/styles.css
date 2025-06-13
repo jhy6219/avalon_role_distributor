@@ -538,9 +538,9 @@ input[type="checkbox"] {
 }
 
 .message-alert.error {
-    background: rgba(220, 53, 69, 0.1);
+    background: rgba(255, 52, 52, 0.716);
     border: 1px solid rgba(220, 53, 69, 0.2);
-    color: #dc3545;
+    color: #ffffff;
 }
 
 .message-alert.info, .message-alert.success {

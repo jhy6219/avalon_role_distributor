@@ -40,6 +40,14 @@
             </div>
         </div>
 
+        <!-- 에러 메시지 카드 (에러가 있을 때만 표시) -->
+        {% if error_message %}
+        <div class="message-alert error">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-text">{{ error_message }}</div>
+        </div>
+        {% endif %}
+
         <!-- 플레이어 목록 카드 -->
         <div class="players-card">
             <div class="players-header">

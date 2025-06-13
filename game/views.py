@@ -121,6 +121,9 @@ def lobby(request:HttpRequest, session_id):
             'game_session': game_session,
         })
 
+    # 에러 메시지가 있으면 함께 전달
+    error_message = request.GET.get('error_message')
+    
     return render(request, 'game/lobby.html', {
         'game_session': game_session,
         'player_nickname': nickname,
@@ -128,6 +131,7 @@ def lobby(request:HttpRequest, session_id):
         'players_in_session': game_session.players.all(),
         'session_link': request.build_absolute_uri(reverse('join', args=[session_id])),
         'host_nickname': game_session.host_nickname,
+        'error_message': error_message,
     })
 
 
@@ -149,6 +153,16 @@ def start_game(request:HttpRequest, session_id):
     except Player.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': '호스트 정보를 찾을 수 없습니다.'}, status=404)
 
+    # 플레이어 수 체크 (5명 미만이면 로비로 돌아가면서 메시지 표시)
+    # 단, 개발자 옵션(option3)이 활성화된 경우는 더미 플레이어가 추가되므로 체크하지 않음
+    current_players = game_session.players.all()
+    if not game_session.option3 and len(current_players) < 5:
+        query = urlencode({
+            'nickname': nickname, 
+            'pin': pin,
+            'error_message': '5명 이상이어야 게임을 시작할 수 있습니다!'
+        })
+        return HttpResponseRedirect(f"{reverse('lobby', args=[session_id])}?{query}")
 
     # 역할 분배
     game_session.distribute_roles()
