@@ -21,12 +21,12 @@
                     <span class="info-label">게임 옵션</span>
                     <div class="info-options">
                         {% if game_session.option1 and game_session.option2 %}
-                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
-                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
-                        {% elif game_session.option1 %}
-                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
-                        {% elif game_session.option2 %}
-                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                                                         <span class="option-badge percival">🛡️ 퍼시벌</span>
+                             <span class="option-badge morgana">🦹‍♀️ 모르가나</span>
+                         {% elif game_session.option1 %}
+                             <span class="option-badge percival">🛡️ 퍼시벌</span>
+                         {% elif game_session.option2 %}
+                             <span class="option-badge morgana">🦹‍♀️ 모르가나</span>
                         {% else %}
                             <span class="option-badge none">🎯 기본 게임</span>
                         {% endif %}
@@ -35,8 +35,33 @@
                 
                 <div class="info-item">
                     <span class="info-label">현재 플레이어</span>
-                    <span class="info-value player-name">{{ player_nickname }}</span>
+                    <span class="info-value player-name">{{ player_nickname|default:"알 수 없음" }}</span>
                 </div>
+                
+                {% if player_nickname %}
+                <div class="info-item">
+                    <span class="info-label">나의 역할</span>
+                    <div class="my-role-info">
+                        {% for player_obj in players_in_session %}
+                            {% if player_obj.nickname == player_nickname %}
+                                {% if player_obj.role == "good" %}
+                                    <span class="role-badge role-good">🕊️ 선인</span>
+                                {% elif player_obj.role == "merlin" %}
+                                    <span class="role-badge role-merlin">🧙‍♂️ 멀린</span>
+                                {% elif player_obj.role == "percival" %}
+                                    <span class="role-badge role-percival">🛡️ 퍼시벌</span>
+                                {% elif player_obj.role == "bad" %}
+                                    <span class="role-badge role-bad">😈 악인</span>
+                                {% elif player_obj.role == "assassin" %}
+                                    <span class="role-badge role-assassin">🗡️ 암살자</span>
+                                {% elif player_obj.role == "morgana" %}
+                                    <span class="role-badge role-morgana">🦹‍♀️ 모르가나</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -44,7 +69,7 @@
         <div class="game-end-message-card">
             <div class="end-message-header">
                 <div class="end-message-icon">🎭</div>
-                <h3 class="end-message-title">게임이 종료되었습니다</h3>
+                <h3 class="end-message-title">게임 결과</h3>
             </div>
             
             <div class="end-message-content">
@@ -63,35 +88,136 @@
             
             <div class="roles-content">
                 <div class="roles-grid">
+                    <!-- 1. 암살자 -->
                     {% for player in players_in_session %}
-                    <div class="role-reveal-item {% if player.role == 'merlin' or player.role == 'good' or player.role == 'percival' %}good-side{% else %}evil-side{% endif %}">
-                        <div class="player-role-avatar">
-                            <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
-                        </div>
-                        
-                        <div class="player-role-info">
-                            <div class="player-role-nickname">{{ player.nickname }}</div>
-                            <div class="player-role-name">
-                                {% if player.role == "good" %}
-                                    <span class="role-badge role-good">🛡️ 선인</span>
-                                {% elif player.role == "merlin" %}
-                                    <span class="role-badge role-merlin">⭐ 멀린</span>
-                                {% elif player.role == "percival" %}
-                                    <span class="role-badge role-percival">🕵️‍♂️ 퍼시벌</span>
-                                {% elif player.role == "bad" %}
-                                    <span class="role-badge role-bad">💀 악인</span>
-                                {% elif player.role == "assassin" %}
-                                    <span class="role-badge role-assassin">🗡️ 암살자</span>
-                                {% elif player.role == "morgana" %}
-                                    <span class="role-badge role-morgana">🧙‍♀️ 모르가나</span>
-                                {% endif %}
+                        {% if player.role == 'assassin' %}
+                        <div class="role-reveal-item evil-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
                             </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-assassin">🗡️ 암살자</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
                         </div>
-                        
-                        {% if player.nickname == game_session.host_nickname %}
-                            <div class="player-host-badge-small">👑</div>
                         {% endif %}
-                    </div>
+                    {% endfor %}
+                    
+                    <!-- 2. 모르가나 -->
+                    {% for player in players_in_session %}
+                        {% if player.role == 'morgana' %}
+                        <div class="role-reveal-item evil-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                            </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-morgana">🦹‍♀️ 모르가나</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- 3. 악인 -->
+                    {% for player in players_in_session %}
+                        {% if player.role == 'bad' %}
+                        <div class="role-reveal-item evil-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                            </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-bad">😈 악인</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- 4. 멀린 -->
+                    {% for player in players_in_session %}
+                        {% if player.role == 'merlin' %}
+                        <div class="role-reveal-item good-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                            </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-merlin">🧙‍♂️ 멀린</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- 5. 퍼시벌 -->
+                    {% for player in players_in_session %}
+                        {% if player.role == 'percival' %}
+                        <div class="role-reveal-item good-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                            </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-percival">🛡️ 퍼시벌</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- 6. 선인 -->
+                    {% for player in players_in_session %}
+                        {% if player.role == 'good' %}
+                        <div class="role-reveal-item good-side">
+                            <div class="player-role-avatar">
+                                <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                            </div>
+                            
+                            <div class="player-role-info">
+                                <div class="player-role-nickname">{{ player.nickname }}</div>
+                                <div class="player-role-name">
+                                    <span class="role-badge role-good">🕊️ 선인</span>
+                                </div>
+                            </div>
+                            
+                            {% if player.nickname == game_session.host_nickname %}
+                                <div class="player-host-badge-small">👑</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>

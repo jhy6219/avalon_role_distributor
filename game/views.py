@@ -32,10 +32,13 @@ def join(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
 
     if not game_session.is_active:
+        # join 뷰에서는 POST 데이터에서 닉네임 추출 시도
+        player_nickname = request.POST.get('nickname') if request.method == 'POST' else None
         return render(request, 'game/ended.html', {
-            'message': '이 게임 세션은 종료되었습니다.',
+            'message': '이미 종료된 게임 세션입니다. 새로운 게임을 시작해보세요!',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
+            'player_nickname': player_nickname,
         })
     
     if request.method == 'POST':
@@ -92,10 +95,13 @@ def lobby(request:HttpRequest, session_id):
 
     # 종료된 세션일 경우 입장 불가
     if not game_session.is_active:
+        # lobby 뷰에서는 GET 파라미터에서 닉네임 추출 시도
+        player_nickname = request.GET.get('nickname')
         return render(request, 'game/ended.html', {
-            'message': '이 게임 세션은 종료되었습니다.',
+            'message': '게임 세션이 종료되어 로비에 접근할 수 없습니다.',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
+            'player_nickname': player_nickname,
         })
 
     nickname = request.GET.get('nickname')
@@ -158,10 +164,13 @@ def role(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
     
     if not game_session.is_active:
+        # role 뷰에서는 GET 파라미터에서 닉네임 추출 시도
+        player_nickname = request.GET.get('nickname')
         return render(request, 'game/ended.html', {
-            'message': '이 게임 세션은 종료되었습니다.',
+            'message': '게임이 중도에 종료되었습니다. 다음 기회에 다시 도전해보세요!',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
+            'player_nickname': player_nickname,
         })
 
     if not game_session.is_started:
@@ -223,15 +232,33 @@ def end_game(request:HttpRequest, session_id):
     game_session.is_active = False  
     game_session.save()
 
-    return redirect('ended', session_id=session_id)
+    # 플레이어 정보를 URL 파라미터로 전달
+    query = urlencode({'nickname': nickname, 'pin': pin})
+    return HttpResponseRedirect(f"{reverse('ended', args=[session_id])}?{query}")
 
 
 def ended(request:HttpRequest, session_id):
     game_session = get_object_or_404(GameSession, session_id=session_id)
+    
+    # URL 파라미터에서 플레이어 정보 가져오기
+    player_nickname = request.GET.get('nickname')
+    player_pin = request.GET.get('pin')
+    
+    # 플레이어 정보 검증 (선택적)
+    if player_nickname and player_pin:
+        try:
+            player = Player.objects.get(game_session=game_session, nickname=player_nickname)
+            if not check_password(player_pin, player.pin):
+                player_nickname = None
+        except Player.DoesNotExist:
+            player_nickname = None
+    
     return render(request, 'game/ended.html', {
-            'message': f'게임이 종료되었습니다.',
+            'message': f'호스트에 의해 게임이 종료되었습니다. 고생하셨습니다!',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
+            'player_nickname': player_nickname,
+            'player_pin': player_pin,
         })
 
 

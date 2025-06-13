@@ -28,7 +28,7 @@ header {
 header h4 {
     margin: 0;
     font-weight: 300;
-    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 header h1 {
@@ -69,9 +69,9 @@ main {
 
 .welcome-subtitle {
     font-size: 1rem;
-    opacity: 0.9;
     margin-bottom: 0;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .game-form {
@@ -148,7 +148,7 @@ main {
 .option-content p {
     font-size: 0.9rem;
     margin: 0;
-    color: #666;
+    color: #555;
     line-height: 1.4;
 }
 
@@ -230,7 +230,7 @@ main {
     border-radius: 8px;
     transition: all 0.2s ease;
     font-size: 0.9rem;
-    color: #666;
+    color: #333;
 }
 
 .dev-options-summary:hover {
@@ -291,7 +291,7 @@ main {
     align-items: center;
     cursor: pointer;
     font-size: 0.85rem;
-    color: #555;
+    color: #333;
 }
 
 .dev-option-icon {
@@ -442,7 +442,7 @@ input[type="checkbox"] {
 .info-label {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #666;
+    color: #333;
     min-width: 80px;
 }
 
@@ -496,7 +496,24 @@ input[type="checkbox"] {
 
 .option-badge.none {
     background: rgba(108, 117, 125, 0.15);
-    color: #6c757d;
+    color: #495057;
+}
+
+/* 나의 역할 정보 */
+.my-role-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.my-nickname {
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: rgba(255, 193, 7, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    color: #b8860b;
 }
 
 /* 참가 폼 카드 */
@@ -562,7 +579,7 @@ input[type="checkbox"] {
 
 .form-subtitle {
     font-size: 0.95rem;
-    color: #666;
+    color: #333;
     margin: 0;
 }
 
@@ -586,7 +603,7 @@ input[type="checkbox"] {
     gap: 0.5rem;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #555;
+    color: #333;
 }
 
 .label-icon {
@@ -610,7 +627,7 @@ input[type="checkbox"] {
 }
 
 .field-input::placeholder {
-    color: #999;
+    color: #666;
 }
 
 /* 폼 액션 */
@@ -708,7 +725,7 @@ input[type="checkbox"] {
     justify-content: center;
     gap: 0.75rem;
     padding: 2rem;
-    color: #666;
+    color: #333;
     font-size: 0.9rem;
 }
 
@@ -1003,12 +1020,12 @@ input[type="checkbox"] {
     font-size: 1.2rem;
     font-weight: 500;
     margin: 0;
-    color: #6c757d;
+    color: #333;
 }
 
 .waiting-description {
     font-size: 0.9rem;
-    color: #868e96;
+    color: #555;
     margin: 0;
 }
 
@@ -1062,7 +1079,7 @@ input[type="checkbox"] {
 .team-details {
     display: block;
     font-size: 0.8rem;
-    color: #666;
+    color: #333;
     line-height: 1.4;
 }
 
@@ -1182,7 +1199,7 @@ input[type="checkbox"] {
     font-weight: 600;
     color: #667eea;
     margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .role-description {
@@ -1194,7 +1211,7 @@ input[type="checkbox"] {
 
 .role-description p {
     margin: 0;
-    color: #555;
+    color: #333;
     line-height: 1.6;
     font-size: 0.95rem;
 }
@@ -1488,6 +1505,15 @@ input[type="checkbox"] {
         padding: 0.9rem 2rem;
         font-size: 1rem;
     }
+    
+    .my-role-info {
+        gap: 0.5rem;
+    }
+    
+    .my-nickname {
+        font-size: 0.85rem;
+        padding: 0.2rem 0.4rem;
+    }
 }
 
 /* Ended Page Styles */
@@ -1533,7 +1559,7 @@ input[type="checkbox"] {
 
 .end-message-text {
     font-size: 1.1rem;
-    color: #856404;
+    color: white;
     margin: 0;
     font-weight: 500;
     line-height: 1.5;
@@ -1582,7 +1608,7 @@ input[type="checkbox"] {
 
 .roles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
 }
 
@@ -1672,7 +1698,7 @@ input[type="checkbox"] {
 
 .role-badge.role-assassin {
     background: rgba(108, 117, 125, 0.15);
-    color: #6c757d;
+    color: #495057;
 }
 
 .role-badge.role-morgana {
@@ -1706,14 +1732,16 @@ input[type="checkbox"] {
     font-size: 1.3rem;
     font-weight: 600;
     margin: 0;
-    color: #20c997;
+    color: #50C878;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .new-game-description {
     font-size: 0.95rem;
-    color: #155724;
+    color: white;
     margin: 0;
     line-height: 1.5;
+    font-weight: 500;
 }
 
 .new-game-btn {

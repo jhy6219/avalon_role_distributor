@@ -21,12 +21,12 @@
                     <span class="info-label">게임 옵션</span>
                     <div class="info-options">
                         {% if game_session.option1 and game_session.option2 %}
-                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
-                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
-                        {% elif game_session.option1 %}
-                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
-                        {% elif game_session.option2 %}
-                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                                                         <span class="option-badge percival">🛡️ 퍼시벌</span>
+                             <span class="option-badge morgana">🦹‍♀️ 모르가나</span>
+                         {% elif game_session.option1 %}
+                             <span class="option-badge percival">🛡️ 퍼시벌</span>
+                         {% elif game_session.option2 %}
+                             <span class="option-badge morgana">🦹‍♀️ 모르가나</span>
                         {% else %}
                             <span class="option-badge none">🎯 기본 게임</span>
                         {% endif %}
@@ -43,7 +43,7 @@
                     <div class="composition-summary">
                         {% with total_players=players_in_session|length %}
                         <div class="team-composition good-team">
-                            <span class="team-header">😇 선인 
+                            <span class="team-header">🕊️ 선인 
                                 {% if total_players == 5 %}3{% elif total_players == 6 %}4{% elif total_players == 7 %}4{% elif total_players == 8 %}5{% elif total_players == 9 %}6{% elif total_players == 10 %}6{% else %}{{ total_players|add:"-2" }}{% endif %}명
                             </span>
                             <span class="team-details">
