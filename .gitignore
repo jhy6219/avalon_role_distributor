@@ -198,3 +198,5 @@ cython_debug/
 
 # Private data
 sender.config
+
+staticfiles
