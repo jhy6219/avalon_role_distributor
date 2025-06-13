@@ -2,20 +2,91 @@
 {% block head_title %}게임 참가{% endblock %}
 {% block page_title %}게임 참가{% endblock %}
 
-
 {% block content %} 
-    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
-        
-    {% if message_text %}
-        <div class="{{ message_level }}">{{ message_text }}</div>
-    {% endif %}
+    <div class="join-container">
+        <!-- 게임 정보 카드 -->
+        <div class="game-info-card">
+            <div class="info-header">
+                <div class="info-icon">🏰</div>
+                <h3 class="info-title">게임 정보</h3>
+            </div>
+            
+            <div class="info-content">
+                <div class="info-item">
+                    <span class="info-label">세션 ID</span>
+                    <span class="info-value session-id">{{ game_session.session_id }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">게임 옵션</span>
+                    <div class="info-options">
+                        {% if game_session.option1 and game_session.option2 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% elif game_session.option1 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                        {% elif game_session.option2 %}
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% else %}
+                            <span class="option-badge none">🎯 기본 게임</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if player_nickname %}
+                <div class="info-item">
+                    <span class="info-label">현재 플레이어</span>
+                    <span class="info-value player-name">{{ player_nickname }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <label for="nickname">닉네임:</label>
-        <input type="text" id="nickname" name="nickname" required><br><br>
-        <label for="pin">PIN:</label>
-        <input type="password" id="pin" name="pin" required><br><br>
-        <button type="submit">참가하기</button>
-    </form>
+        <!-- 참가 폼 -->
+        <div class="join-form-card">
+            {% if message_text %}
+                <div class="message-alert {{ message_level }}">
+                    <div class="alert-icon">
+                        {% if message_level == 'error' %}⚠️{% else %}ℹ️{% endif %}
+                    </div>
+                    <div class="alert-text">{{ message_text }}</div>
+                </div>
+            {% endif %}
+
+            <form method="post" class="join-form">
+                {% csrf_token %}
+                
+                <div class="form-header">
+                    <div class="form-icon">👋</div>
+                    <h3 class="form-title">게임 참가하기</h3>
+                    <p class="form-subtitle">닉네임과 PIN을 입력해주세요</p>
+                </div>
+
+                <div class="form-fields">
+                    <div class="field-group">
+                        <label for="nickname" class="field-label">
+                            <span class="label-icon">👤</span>
+                            <span class="label-text">닉네임</span>
+                        </label>
+                        <input type="text" id="nickname" name="nickname" required class="field-input" placeholder="사용할 닉네임을 입력하세요">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="pin" class="field-label">
+                            <span class="label-icon">🔐</span>
+                            <span class="label-text">패스워드</span>
+                        </label>
+                        <input type="password" id="pin" name="pin" required class="field-input" placeholder="패스워드를 입력하세요">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="join-btn">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">참가하기</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

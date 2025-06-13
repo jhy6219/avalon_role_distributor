@@ -287,7 +287,7 @@ def handle_email(n_clicks, styles, names, emails, domains, selected_roles):
             # print(value['email'])
             send_role_msg(es,
                 email,
-                f"[{result_timestamp}] {name}님 아발론 역할 분배 결과 🧙‍♂️",
+                f"[{result_timestamp}] {name}님 아발론 역할 분배 결과 🏰",
                 image,
                 bold,
                 desc
@@ -373,6 +373,7 @@ def initialize_inputs(children):
                         placeholder="이름", 
                         type="text", 
                         id={'type': 'name', 'index': 0},
+                        value="혜윤",
                         style={
                             "borderRadius": "10px",
                             "border": "1px solid #e9ecef",
@@ -389,6 +390,7 @@ def initialize_inputs(children):
                             placeholder="이메일", 
                             type="text", 
                             id={'type': 'email', 'index': 0},
+                            value="jhy6219",
                             style={
                                 "borderRadius": "10px 0 0 10px",
                                 "border": "1px solid #e9ecef",
@@ -435,4 +437,4 @@ def initialize_inputs(children):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

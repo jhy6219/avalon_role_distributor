@@ -2,35 +2,113 @@
 {% block head_title %}게임 종료{% endblock %}
 {% block page_title %}게임 종료{% endblock %}
 
-
 {% block content %}
-    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
-        <p>{{ message }}</p>
-
-    <!-- 역할 공개 -->
-    {% if game_session.is_started %}
-    <table id="roles">
-        <col style="width: 30%;">
-        <col style="width: 40%;">
-        <col style="width: 30%;">
-        <tbody>
-            {% for player in players_in_session %}
-                <tr>
-                    <td><h3>{{ player.nickname }}</h3></td>
-                    <td><img src="{{ player.role_image }}" alt="{{ player.role }}" class="responsive-image"></td>
-                    
-                    <td><h3>
-                        {% if player.role == "good" %}       선인
-                        {% elif player.role == "merlin" %}   멀린
-                        {% elif player.role == "percival" %} 퍼시벌
-                        {% elif player.role == "bad" %}      악인
-                        {% elif player.role == "assassin" %} 암살자
-                        {% elif player.role == "morgana" %}  모르가나
+    <div class="ended-container">
+        <!-- 게임 정보 카드 -->
+        <div class="game-info-card">
+            <div class="info-header">
+                <div class="info-icon">🏰</div>
+                <h3 class="info-title">게임 정보</h3>
+            </div>
+            
+            <div class="info-content">
+                <div class="info-item">
+                    <span class="info-label">세션 ID</span>
+                    <span class="info-value session-id">{{ game_session.session_id }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">게임 옵션</span>
+                    <div class="info-options">
+                        {% if game_session.option1 and game_session.option2 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% elif game_session.option1 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                        {% elif game_session.option2 %}
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% else %}
+                            <span class="option-badge none">🎯 기본 게임</span>
                         {% endif %}
-                    </h3></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">현재 플레이어</span>
+                    <span class="info-value player-name">{{ player_nickname }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 종료 메시지 카드 -->
+        <div class="game-end-message-card">
+            <div class="end-message-header">
+                <div class="end-message-icon">🎭</div>
+                <h3 class="end-message-title">게임이 종료되었습니다</h3>
+            </div>
+            
+            <div class="end-message-content">
+                <p class="end-message-text">{{ message }}</p>
+            </div>
+        </div>
+
+        <!-- 역할 공개 카드 -->
+        {% if game_session.is_started %}
+        <div class="roles-reveal-card">
+            <div class="roles-header">
+                <div class="roles-icon">🎪</div>
+                <h3 class="roles-title">역할 공개</h3>
+                <div class="roles-count">{{ players_in_session|length }}명</div>
+            </div>
+            
+            <div class="roles-content">
+                <div class="roles-grid">
+                    {% for player in players_in_session %}
+                    <div class="role-reveal-item {% if player.role == 'merlin' or player.role == 'good' or player.role == 'percival' %}good-side{% else %}evil-side{% endif %}">
+                        <div class="player-role-avatar">
+                            <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-reveal-image">
+                        </div>
+                        
+                        <div class="player-role-info">
+                            <div class="player-role-nickname">{{ player.nickname }}</div>
+                            <div class="player-role-name">
+                                {% if player.role == "good" %}
+                                    <span class="role-badge role-good">🛡️ 선인</span>
+                                {% elif player.role == "merlin" %}
+                                    <span class="role-badge role-merlin">⭐ 멀린</span>
+                                {% elif player.role == "percival" %}
+                                    <span class="role-badge role-percival">🕵️‍♂️ 퍼시벌</span>
+                                {% elif player.role == "bad" %}
+                                    <span class="role-badge role-bad">💀 악인</span>
+                                {% elif player.role == "assassin" %}
+                                    <span class="role-badge role-assassin">🗡️ 암살자</span>
+                                {% elif player.role == "morgana" %}
+                                    <span class="role-badge role-morgana">🧙‍♀️ 모르가나</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if player.nickname == game_session.host_nickname %}
+                            <div class="player-host-badge-small">👑</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 새 게임 추천 카드 -->
+        <div class="new-game-card">
+            <div class="new-game-content">
+                <div class="new-game-icon">🎮</div>
+                <h3 class="new-game-title">새로운 게임을 시작해보세요!</h3>
+                <p class="new-game-description">다시 한 번 아발론의 세계로 떠나보시겠어요?</p>
+                <a href="{% url 'home' %}" class="new-game-btn">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">새 게임 만들기</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 {% endblock %}

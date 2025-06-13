@@ -2,64 +2,135 @@
 {% block head_title %}게임 시작{% endblock %}
 {% block page_title %}게임 시작{% endblock %}
 
-
 {% block content %} 
-    {% include 'game/includes/info.html' with player_nickname=player_nickname game_session=game_session %}
-    
-    <table id="player-list">
-        <thead><b>현재 참여 중인 플레이어</b></thead>
-        <tbody>
-            {% for player in players_in_session %}
-                <tr><td>{{ player.nickname }}</td></tr>
-            {% endfor %}
-        </tbody>
-    </table >
+    <div class="role-container">
+        <!-- 게임 정보 카드 -->
+        <div class="game-info-card">
+            <div class="info-header">
+                <div class="info-icon">🏰</div>
+                <h3 class="info-title">게임 정보</h3>
+            </div>
+            
+            <div class="info-content">
+                <div class="info-item">
+                    <span class="info-label">세션 ID</span>
+                    <span class="info-value session-id">{{ game_session.session_id }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">게임 옵션</span>
+                    <div class="info-options">
+                        {% if game_session.option1 and game_session.option2 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% elif game_session.option1 %}
+                            <span class="option-badge percival">🕵️‍♂️ 퍼시벌</span>
+                        {% elif game_session.option2 %}
+                            <span class="option-badge morgana">🧙‍♀️ 모르가나</span>
+                        {% else %}
+                            <span class="option-badge none">🎯 기본 게임</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">현재 플레이어</span>
+                    <span class="info-value player-name">{{ player_nickname }}</span>
+                </div>
+                
+                <div class="info-item composition-info">
+                    <span class="info-label">게임 구성</span>
+                    <div class="composition-summary">
+                        {% with total_players=players_in_session|length %}
+                        <div class="team-composition good-team">
+                            <span class="team-header">😇 선인 
+                                {% if total_players == 5 %}3{% elif total_players == 6 %}4{% elif total_players == 7 %}4{% elif total_players == 8 %}5{% elif total_players == 9 %}6{% elif total_players == 10 %}6{% else %}{{ total_players|add:"-2" }}{% endif %}명
+                            </span>
+                            <span class="team-details">
+                                (멀린 1명{% if game_session.option1 %}, 퍼시벌 1명{% endif %}{% if total_players == 5 %}{% if game_session.option1 %}, 일반 선인 1명{% else %}, 일반 선인 2명{% endif %}{% elif total_players == 6 %}{% if game_session.option1 %}, 일반 선인 2명{% else %}, 일반 선인 3명{% endif %}{% elif total_players == 7 %}{% if game_session.option1 %}, 일반 선인 2명{% else %}, 일반 선인 3명{% endif %}{% elif total_players >= 8 %}, 일반 선인 여러명{% endif %})
+                            </span>
+                        </div>
+                        <div class="team-composition evil-team">
+                            <span class="team-header">😈 악인 
+                                {% if total_players == 5 %}2{% elif total_players == 6 %}2{% elif total_players == 7 %}3{% elif total_players == 8 %}3{% elif total_players == 9 %}3{% elif total_players == 10 %}4{% else %}2{% endif %}명
+                            </span>
+                            <span class="team-details">
+                                (암살자 1명{% if game_session.option2 %}, 모르가나 1명{% endif %}{% if total_players == 5 %}{% if not game_session.option2 %}, 일반 악인 1명{% endif %}{% elif total_players == 6 %}{% if not game_session.option2 %}, 일반 악인 1명{% endif %}{% elif total_players == 7 %}{% if game_session.option2 %}, 일반 악인 1명{% else %}, 일반 악인 2명{% endif %}{% elif total_players >= 8 %}, 일반 악인 여러명{% endif %})
+                            </span>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <img src="{{ player.role_image }}" alt="{{ player.role }}" class="responsive-image">
-    <h3> {{ player.role_intro }} </h3>
-    <p> {{ role_detail|linebreaksbr  }} </p>
+        <!-- 플레이어 목록 카드 -->
+        <div class="players-card">
+            <div class="players-header">
+                <div class="players-icon">👥</div>
+                <h3 class="players-title">참여 플레이어</h3>
+                <div class="players-count">{{ players_in_session|length }}명</div>
+            </div>
+            
+            <div class="players-content">
+                <div class="player-grid">
+                    {% for player_obj in players_in_session %}
+                    <div class="player-item-compact">
+                        <div class="player-avatar-small">👤</div>
+                        <div class="player-nickname-compact">{{ player_obj.nickname }}</div>
+                        {% if player_obj.nickname == game_session.host_nickname %}
+                            <div class="player-host-badge-small">👑</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
-    {% if player_nickname == game_session.host_nickname %}
-        <form id="end-game-form" method="post" action="{% url 'end_game' game_session.session_id %}">
-            {% csrf_token %}
-            <input type="hidden" name="nickname" value="{{ player_nickname }}">
-            <input type="hidden" name="pin" value="{{ player_pin }}">
-            <button type="submit" onclick="return confirm('정말로 게임을 종료하시겠습니까?');">게임 종료</button>
-        </form>
-    {% endif %}
+        <!-- 역할 정보 카드 -->
+        <div class="role-card">
+            <div class="role-header">
+                <div class="role-header-icon">🎭</div>
+                <h3 class="role-title">당신의 역할</h3>
+            </div>
+            
+            <div class="role-content">
+                <div class="role-image-container">
+                    <img src="{{ player.role_image }}" alt="{{ player.role }}" class="role-image">
+                </div>
+                
+                <div class="role-intro">
+                    <h4 class="role-name-display">{{ player.role_intro }}</h4>
+                </div>
+                
+                <div class="role-description">
+                    <p>{{ role_detail|linebreaksbr }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 호스트 액션 카드 (호스트만 보임) -->
+        {% if player_nickname == game_session.host_nickname %}
+        <div class="host-actions-card danger">
+            <div class="host-header">
+                <div class="host-icon">🛑</div>
+                <h3 class="host-title">게임 관리</h3>
+                <div class="host-badge">호스트</div>
+            </div>
+            
+            <div class="host-content">
+                <p class="end-description">게임을 중단하고 싶으시면 아래 버튼을 눌러주세요</p>
+                <form id="end-game-form" method="post" action="{% url 'end_game' game_session.session_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="nickname" value="{{ player_nickname }}">
+                    <input type="hidden" name="pin" value="{{ player_pin }}">
+                    <button type="submit" class="end-game-btn" onclick="return confirm('정말로 게임을 종료하시겠습니까?');">
+                        <span class="btn-icon">🛑</span>
+                        <span class="btn-text">게임 종료</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 {% endblock %}
-
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>게임 시작 - 역할 확인</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'game/css/styles.css' %}">
-</head>
-<body>
-    <h1>게임 시작! - 세션 ID: {{ game_session.session_id }}</h1>
-    <p><strong>플레이어:</strong> {{ player_nickname }}</p>
-
-    <h2>게임 옵션</h2>
-    <ul id="selected-options">
-        {% if game_session.option1 %}
-            <li>옵션 1: 활성화됨</li>
-        {% endif %}
-        {% if game_session.option2 %}
-            <li>옵션 2: 활성화됨</li>
-        {% endif %}
-        {% if game_session.option3 %}
-            <li>옵션 3: 활성화됨</li>
-        {% endif %}
-        {# 만약 선택된 옵션이 하나도 없다면 표시할 메시지 #}
-        {% if not game_session.option1 and not game_session.option2 and not game_session.option3 %}
-            <li>선택된 게임 옵션이 없습니다.</li>
-        {% endif %}
-    </ul>
-
-
-
-
-</body>
-</html>

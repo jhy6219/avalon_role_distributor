@@ -2,14 +2,73 @@
 {% block head_title %}게임 생성{% endblock %}
 {% block page_title %}게임 생성{% endblock %}
 
-
 {% block content %} 
-    <form method="post">
-        {% csrf_token %}
-        <h2>게임 옵션 선택</h2>
-        <label><input type="checkbox" id="option1" name="option1" value="true"> 옵션 1 </label><br>
-        <label><input type="checkbox" id="option2" name="option2" value="true"> 옵션 2 </label><br>
-        <label><input type="checkbox" id="option3" name="option3" value="true"> 옵션 3 </label><br><br>
-        <button type="submit">세션 만들기</button>
-    </form>
+    <div class="home-container">
+        <div class="welcome-section">
+            <div class="app-icon">🏰</div>
+            <h2 class="welcome-title">아발론에 오신 것을 환영합니다</h2>
+            <p class="welcome-subtitle">최고의 전략 게임을 경험하세요</p>
+        </div>
+
+        <form method="post" class="game-form">
+            {% csrf_token %}
+            
+            <!-- 게임 옵션 선택 -->
+            <div class="options-section">
+                <h3 class="section-title">게임 옵션 선택</h3>
+                <div class="options-grid">
+                    <div class="option-card">
+                        <input type="checkbox" id="option1" name="option1" value="true" class="option-checkbox">
+                        <label for="option1" class="option-label">
+                            <div class="option-icon">🕵️‍♂️</div>
+                            <div class="option-content">
+                                <h4>퍼시벌 추가</h4>
+                                <p>아더 왕을 믿고 배신자를 찾아내는 충성스러운 기사</p>
+                            </div>
+                            <div class="option-toggle"></div>
+                        </label>
+                    </div>
+
+                    <div class="option-card">
+                        <input type="checkbox" id="option2" name="option2" value="true" class="option-checkbox">
+                        <label for="option2" class="option-label">
+                            <div class="option-icon">🧙‍♀️</div>
+                            <div class="option-content">
+                                <h4>모르가나 추가</h4>
+                                <p>악의 마법사로 위장한 배신자</p>
+                            </div>
+                            <div class="option-toggle"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메인 액션 버튼 -->
+            <div class="main-action-section">
+                <button type="submit" class="create-session-btn">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">세션 만들기</span>
+                </button>
+            </div>
+
+            <!-- 개발용 옵션  -->
+            <div class="dev-options-section">
+                <details class="dev-options-toggle">
+                    <summary class="dev-options-summary">
+                        <span class="dev-icon">⚙️</span>
+                        <span class="dev-text">개발용 설정</span>
+                    </summary>
+                    <div class="dev-options-content">
+                        <div class="dev-option">
+                            <input type="checkbox" id="option3" name="option3" value="true" class="dev-checkbox">
+                            <label for="option3" class="dev-label">
+                                <span class="dev-option-icon">👥</span>
+                                <span class="dev-option-text">더미 유저 추가</span>
+                            </label>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </form>
+    </div>
 {% endblock %}
