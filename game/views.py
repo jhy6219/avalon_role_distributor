@@ -35,7 +35,7 @@ def join(request:HttpRequest, session_id):
         # join 뷰에서는 POST 데이터에서 닉네임 추출 시도
         player_nickname = request.POST.get('nickname') if request.method == 'POST' else None
         return render(request, 'game/ended.html', {
-            'message': '이미 종료된 게임 세션입니다. 새로운 게임을 시작해보세요!',
+            'message': '🎭 이 아발론 세션은 이미 막을 내렸습니다. 새로운 모험을 시작해보세요!',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
             'player_nickname': player_nickname,
@@ -64,7 +64,7 @@ def join(request:HttpRequest, session_id):
             if game_session.is_started:
                 return render(request, 'game/join.html', {
                     'game_session': game_session,
-                    'message_text': '이미 시작된 게임입니다.',
+                    'message_text': '🏰 원탁의 기사들이 이미 퀘스트를 시작했어요! 다음 모험을 기다려주세요.',
                     'message_level': 'error',
                 })
             
@@ -98,7 +98,7 @@ def lobby(request:HttpRequest, session_id):
         # lobby 뷰에서는 GET 파라미터에서 닉네임 추출 시도
         player_nickname = request.GET.get('nickname')
         return render(request, 'game/ended.html', {
-            'message': '게임 세션이 종료되어 로비에 접근할 수 없습니다.',
+            'message': '🏰 원탁의 기사들이 이미 해산했습니다. 로비 입장이 불가능해요.',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
             'player_nickname': player_nickname,
@@ -117,7 +117,7 @@ def lobby(request:HttpRequest, session_id):
         
     except Player.DoesNotExist:
         return render(request, 'game/kicked.html', {
-            'message': '이 세션에서 퇴장당했거나 존재하지 않는 사용자입니다.',
+            'message': '🚪 이 아발론 세션에서 추방되었거나 초대받지 않은 사용자입니다.',
             'game_session': game_session,
         })
 
@@ -181,7 +181,7 @@ def role(request:HttpRequest, session_id):
         # role 뷰에서는 GET 파라미터에서 닉네임 추출 시도
         player_nickname = request.GET.get('nickname')
         return render(request, 'game/ended.html', {
-            'message': '게임이 중도에 종료되었습니다. 다음 기회에 다시 도전해보세요!',
+            'message': '호스트에 의해 게임이 종료되었습니다. 고생하셨습니다!',
             'game_session': game_session,
             'players_in_session': game_session.players.all(),
             'player_nickname': player_nickname,
@@ -202,7 +202,7 @@ def role(request:HttpRequest, session_id):
             return redirect('join', session_id=session_id)
     except Player.DoesNotExist:
         return render(request, 'game/kicked.html', {
-            'message': '이 세션에 참가하지 않았거나 존재하지 않는 사용자입니다.',
+            'message': '🛡️ 원탁에 자리가 없거나 참가 자격이 확인되지 않는 기사입니다.',
             'game_session': game_session,
         })
 
@@ -315,20 +315,20 @@ def kick_player(request:HttpRequest, session_id):
     kicker_pin = request.POST.get('pin')
 
     if not game_session.is_active:
-        return render(request, 'game/ended.html', {'message': '종료된 세션입니다.'})
+        return render(request, 'game/ended.html', {'message': '🎭 이미 막을 내린 아발론 세션입니다.'})
 
     if game_session.is_started:
         return JsonResponse({'status': 'error', 'message': '게임이 시작되어 참가자를 추방할 수 없습니다.'}, status=400)
 
     if target_nickname == kicker_nickname:
         return render(request, 'game/kicked.html', {
-            'message': '자기 자신은 제거할 수 없습니다.',
+            'message': '⚔️ 기사는 자신의 검으로 자신을 베어낼 수 없습니다.',
             'game_session': game_session,
         })
 
     if kicker_nickname != game_session.host_nickname:
         return render(request, 'game/kicked.html', {
-            'message': '관리자만 참가자를 제거할 수 있습니다.',
+            'message': '👑 오직 원탁의 주인만이 다른 기사들의 운명을 결정할 수 있습니다.',
         })
 
     try:

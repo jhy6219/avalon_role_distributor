@@ -31,6 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '211.188.61.40',
+    '10.0.1.6',
     'localhost',
     '127.0.0.1',
 ]
@@ -123,8 +124,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
