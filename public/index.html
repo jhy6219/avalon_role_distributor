@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아발론 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                    ⚔️ 아발론 ⚔️
+                </h1>
+                <p class="text-xl text-gray-300">선과 악의 대결, 당신의 정체를 숨기고 승리하세요!</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 방 만들기 -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                    <h2 class="text-3xl font-bold text-white mb-6 text-center">🏰 방 만들기</h2>
+                    <form id="createRoomForm" class="space-y-6">
+                        <div>
+                            <label for="hostName" class="block text-white font-medium mb-2">호스트 이름</label>
+                            <input type="text" id="hostName" name="hostName" required
+                                   class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="당신의 이름을 입력하세요">
+                        </div>
+                        
+                        <!-- 특수 캐릭터 토글 -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white">특수 캐릭터 설정</h3>
+                            
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-4">
+                                <div>
+                                    <label class="text-white font-medium">오베론 (Oberon)</label>
+                                    <p class="text-sm text-gray-300">악역이지만 다른 악역을 모르는 캐릭터</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="includeOberon" name="includeOberon">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-4">
+                                <div>
+                                    <label class="text-white font-medium">모드레드 (Mordred)</label>
+                                    <p class="text-sm text-gray-300">멀린에게 보이지 않는 악역</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="includeMordred" name="includeMordred">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                            방 만들기
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 방 참가하기 -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                    <h2 class="text-3xl font-bold text-white mb-6 text-center">🚪 방 참가하기</h2>
+                    <form id="joinRoomForm" class="space-y-6">
+                        <div>
+                            <label for="roomCode" class="block text-white font-medium mb-2">방 코드</label>
+                            <input type="text" id="roomCode" name="roomCode" required
+                                   class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
+                                   placeholder="6자리 방 코드를 입력하세요"
+                                   maxlength="6">
+                        </div>
+                        <div>
+                            <label for="playerName" class="block text-white font-medium mb-2">플레이어 이름</label>
+                            <input type="text" id="playerName" name="playerName" required
+                                   class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="당신의 이름을 입력하세요">
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                            방 참가하기
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 게임 규칙 -->
+            <div class="mt-12 bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">📜 게임 규칙</h2>
+                <div class="grid md:grid-cols-2 gap-6 text-gray-300">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-3">선역 (아서왕의 충신들)</h3>
+                        <ul class="space-y-2">
+                            <li>• <span class="text-blue-400">멀린</span>: 모든 악역을 알 수 있음 (모드레드 제외)</li>
+                            <li>• <span class="text-blue-400">퍼시발</span>: 멀린과 모르가나를 구별할 수 없음</li>
+                            <li>• <span class="text-blue-400">충신</span>: 특별한 능력이 없는 선역</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-3">악역 (모르드레드의 부하들)</h3>
+                        <ul class="space-y-2">
+                            <li>• <span class="text-red-400">암살자</span>: 게임 종료 시 멀린을 암살할 수 있음</li>
+                            <li>• <span class="text-red-400">모르가나</span>: 퍼시발에게 멀린으로 보임</li>
+                            <li>• <span class="text-red-400">모드레드</span>: 멀린에게 보이지 않음</li>
+                            <li>• <span class="text-red-400">오베론</span>: 다른 악역을 모름</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 메시지 -->
+    <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // 방 코드 입력 시 자동으로 대문자 변환
+        document.getElementById('roomCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // 알림 메시지 표시 함수
+        function showMessage(message, type = 'error') {
+            const messageContainer = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-6 py-3 rounded-lg shadow-lg mb-2 animate-pulse`;
+            messageDiv.textContent = message;
+            messageContainer.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // 방 만들기 폼 처리
+        document.getElementById('createRoomForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                hostName: formData.get('hostName'),
+                includeOberon: document.getElementById('includeOberon').checked,
+                includeMordred: document.getElementById('includeMordred').checked
+            };
+
+            try {
+                const response = await fetch('/api/create-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 세션 스토리지에 플레이어 정보 저장
+                    sessionStorage.setItem('playerName', data.hostName);
+                    sessionStorage.setItem('roomCode', result.roomCode);
+                    
+                    // 방으로 이동
+                    window.location.href = `/room/${result.roomCode}`;
+                } else {
+                    showMessage(result.error);
+                }
+            } catch (error) {
+                showMessage('방 만들기에 실패했습니다.');
+            }
+        });
+
+        // 방 참가하기 폼 처리
+        document.getElementById('joinRoomForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                roomCode: formData.get('roomCode').toUpperCase(),
+                playerName: formData.get('playerName')
+            };
+
+            try {
+                const response = await fetch('/api/join-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 세션 스토리지에 플레이어 정보 저장
+                    sessionStorage.setItem('playerName', data.playerName);
+                    sessionStorage.setItem('roomCode', result.roomCode);
+                    
+                    // 방으로 이동
+                    window.location.href = `/room/${result.roomCode}`;
+                } else {
+                    showMessage(result.error);
+                }
+            } catch (error) {
+                showMessage('방 참가에 실패했습니다.');
+            }
+        });
+    </script>
+</body>
+</html>
