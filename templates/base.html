@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}아발론 게임{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .role-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .role-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .evil-role {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        .good-role {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    {% if messages %}
+        <div class="fixed top-4 right-4 z-50">
+            {% for message in messages %}
+                <div class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg mb-2 animate-pulse">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>

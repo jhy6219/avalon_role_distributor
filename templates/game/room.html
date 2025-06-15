@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}아발론 게임 - 방 {{ room.room_code }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- 방 정보 헤더 -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">방 코드: {{ room.room_code }}</h1>
+                <p class="text-gray-300">호스트: {{ room.host_name }}</p>
+                <div class="flex gap-4 mt-2">
+                    {% if room.include_oberon %}
+                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm">오베론 포함</span>
+                    {% endif %}
+                    {% if room.include_mordred %}
+                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm">모드레드 포함</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-white text-lg">플레이어: {{ players|length }}/10</p>
+                {% if player.is_host %}
+                    <button id="startGameBtn" 
+                            class="mt-2 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+                        게임 시작
+                    </button>
+                    <button id="restartGameBtn" 
+                            class="mt-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hidden">
+                        로비로 돌아가기
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- 플레이어 목록 -->
+        <div class="lg:col-span-1">
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <h2 class="text-xl font-bold text-white mb-4">플레이어 목록</h2>
+                <div id="playerList" class="space-y-3">
+                    {% for p in players %}
+                        <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                            <div class="flex items-center">
+                                {% if p.is_host %}
+                                    <span class="text-yellow-400 mr-2">👑</span>
+                                {% endif %}
+                                <span class="text-white font-medium">{{ p.name }}</span>
+                                {% if p.name == player.name %}
+                                    <span class="text-blue-400 ml-2">(나)</span>
+                                {% endif %}
+                            </div>
+                            {% if p.role %}
+                                <span class="text-sm text-gray-300">역할 배정됨</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 영역 -->
+        <div class="lg:col-span-2">
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <div id="gameArea">
+                    {% if not game_state %}
+                        <!-- 대기 화면 -->
+                        <div class="text-center py-12">
+                            <h2 class="text-2xl font-bold text-white mb-4">게임 대기 중...</h2>
+                            <p class="text-gray-300 mb-6">호스트가 게임을 시작할 때까지 기다려주세요.</p>
+                            <div class="text-gray-400">
+                                <p>최소 5명의 플레이어가 필요합니다.</p>
+                                <p>현재 플레이어: {{ players|length }}명</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- 게임 진행 화면 -->
+                        <div id="gameContent">
+                            {% if game_state.phase == 'role_reveal' %}
+                                <div class="text-center">
+                                    <h2 class="text-2xl font-bold text-white mb-6">당신의 역할</h2>
+                                    <div id="roleCard" class="role-card rounded-2xl p-8 text-white text-center max-w-md mx-auto">
+                                        <h3 class="text-3xl font-bold mb-4">{{ player.role|title }}</h3>
+                                        <div id="roleInfo" class="text-lg"></div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const roomCode = '{{ room.room_code }}';
+    const playerName = '{{ player.name }}';
+    const isHost = {{ player.is_host|yesno:"true,false" }};
+    const playerRole = '{{ player.role }}';
+
+    // WebSocket 연결
+    const gameSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/room/' + roomCode + '/'
+    );
+
+    gameSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'game_update') {
+            updateGameState(data.message);
+        }
+    };
+
+    // 게임 시작 버튼
+    document.getElementById('startGameBtn')?.addEventListener('click', function() {
+        fetch(`/api/room/${roomCode}/start/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || '게임 시작에 실패했습니다.');
+            }
+        });
+    });
+
+    // 로비로 돌아가기 버튼
+    document.getElementById('restartGameBtn')?.addEventListener('click', function() {
+        if (confirm('정말로 로비로 돌아가시겠습니까?')) {
+            fetch(`/api/room/${roomCode}/restart/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || '로비 복귀에 실패했습니다.');
+                }
+            });
+        }
+    });
+
+    // 역할 정보 표시
+    if (playerRole) {
+        const roleCard = document.getElementById('roleCard');
+        const roleInfo = document.getElementById('roleInfo');
+        
+        const roleDescriptions = {
+            'merlin': {
+                description: '모든 악역을 알 수 있지만, 정체가 들키면 안 됩니다.',
+                class: 'good-role'
+            },
+            'percival': {
+                description: '멀린과 모르가나를 구별할 수 없습니다.',
+                class: 'good-role'
+            },
+            'servant': {
+                description: '선량한 아서왕의 충신입니다.',
+                class: 'good-role'
+            },
+            'assassin': {
+                description: '게임 종료 시 멀린을 암살할 수 있습니다.',
+                class: 'evil-role'
+            },
+            'morgana': {
+                description: '퍼시발에게 멀린으로 보입니다.',
+                class: 'evil-role'
+            },
+            'mordred': {
+                description: '멀린에게 보이지 않는 악역입니다.',
+                class: 'evil-role'
+            },
+            'oberon': {
+                description: '다른 악역을 모르는 악역입니다.',
+                class: 'evil-role'
+            },
+            'minion': {
+                description: '모르드레드의 충실한 부하입니다.',
+                class: 'evil-role'
+            }
+        };
+
+        if (roleDescriptions[playerRole]) {
+            roleInfo.textContent = roleDescriptions[playerRole].description;
+            roleCard.classList.add(roleDescriptions[playerRole].class);
+        }
+
+        // 게임이 시작되면 로비로 돌아가기 버튼 표시
+        if (isHost) {
+            document.getElementById('startGameBtn').style.display = 'none';
+            document.getElementById('restartGameBtn').classList.remove('hidden');
+        }
+    }
+
+    function updateGameState(gameState) {
+        // 게임 상태 업데이트 로직
+        console.log('Game state updated:', gameState);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
